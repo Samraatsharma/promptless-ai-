@@ -43,3 +43,24 @@ export const DEMO_CONFIG = {
 } as const;
 
 export type DemoConfig = typeof DEMO_CONFIG;
+
+// ─── Video Recording Configuration ───────────────────────────────────────────
+
+export const VIDEO_CONFIG = {
+  /** Target recording resolution */
+  width: 1920,
+  height: 1080,
+  /** Target frame rate */
+  fps: 60,
+  /** Title card text shown at the start of the demo */
+  titleText: 'Promptless AI – Context-Aware Browser Assistant',
+  subtitleText: 'Zero-Click AI for LinkedIn, YouTube & More',
+  /** Duration of title card in seconds */
+  titleDurationSecs: 4,
+  /** Fade in/out duration in seconds */
+  fadeDurationSecs: 0.8,
+  /** H.264 CRF quality — 0=lossless, 18=near-lossless, 23=default, 28=small */
+  crf: 18,
+} as const;
+
+export type VideoConfig = typeof VIDEO_CONFIG;

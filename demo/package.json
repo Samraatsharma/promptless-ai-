@@ -4,6 +4,7 @@
   "description": "Promptless AI — Cinematic Demo Automation Framework",
   "scripts": {
     "demo": "ts-node runner.ts full-demo",
+    "demo:video": "ts-node record.ts",
     "linkedin-demo": "ts-node runner.ts linkedin-demo",
     "youtube-demo": "ts-node runner.ts youtube-demo",
     "github-demo": "ts-node runner.ts github-demo",

@@ -11,7 +11,7 @@ import { Page, BrowserContext } from 'playwright';
 import { runLinkedInDemo } from './linkedin';
 import { runYouTubeDemo } from './youtube';
 import { runGitHubDemo } from './github';
-import { sleep } from '../utils/mouse';
+import { sleep, smoothScroll } from '../utils/mouse';
 import { waitForPageLoad } from '../utils/extension';
 import { DEMO_CONFIG } from '../config';
 
@@ -65,7 +65,18 @@ export async function runFullDemo(
   await page.goto(DEMO_CONFIG.urls.promptlessWebsite, { waitUntil: 'domcontentloaded' });
   await waitForPageLoad(page);
 
-  // Linger on the landing page so viewers can absorb it
+  // Smooth hero scroll to let the brand absorb
+  await sleep(1500);
+  await smoothScroll(page, 'down', 300);
+  await sleep(1200);
+  await smoothScroll(page, 'down', 300);
+  await sleep(1500);
+
+  // Scroll back to top — logo closing shot
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  await sleep(DEMO_CONFIG.timing.longPause);
+
+  // Extended dwell on logo/hero — the closing frame for the video
   await sleep(DEMO_CONFIG.timing.longPause);
 
   console.log('\n' + '='.repeat(60));
