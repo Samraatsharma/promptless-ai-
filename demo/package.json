@@ -1,0 +1,21 @@
+{
+  "name": "promptless-ai-demo",
+  "version": "1.0.0",
+  "description": "Promptless AI — Cinematic Demo Automation Framework",
+  "scripts": {
+    "demo": "ts-node runner.ts full-demo",
+    "linkedin-demo": "ts-node runner.ts linkedin-demo",
+    "youtube-demo": "ts-node runner.ts youtube-demo",
+    "github-demo": "ts-node runner.ts github-demo",
+    "gmail-demo": "ts-node runner.ts gmail-demo",
+    "full-demo": "ts-node runner.ts full-demo"
+  },
+  "dependencies": {
+    "playwright": "^1.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}
