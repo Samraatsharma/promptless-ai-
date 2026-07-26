@@ -2,6 +2,8 @@
 
 # dependencies
 /node_modules
+/chrome-extension/node_modules
+/chrome-extension/dist
 /.pnp
 .pnp.*
 .yarn/*

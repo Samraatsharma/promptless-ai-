@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Promptless AI — Zero-Click Browser Intelligence",
+  "version": "1.0.0",
+  "description": "AI that understands your intent before you ask. Zero-click actions for LinkedIn jobs and YouTube videos.",
+  "permissions": [
+    "sidePanel",
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.linkedin.com/*",
+    "*://*.youtube.com/*",
+    "http://localhost:3000/*",
+    "https://*/*"
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.linkedin.com/jobs/*",
+        "*://*.youtube.com/watch*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Open Promptless AI Side Panel"
+  }
+}
