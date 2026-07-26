@@ -2,7 +2,7 @@ import React from "react";
 import { Sparkles } from "lucide-react";
 
 interface HeaderProps {
-  platform: "linkedin" | "youtube" | "unknown";
+  platform: "linkedin" | "youtube" | "unsupported" | "unknown";
   isConnected: boolean;
 }
 

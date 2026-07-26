@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
+import { Sparkles, X } from "lucide-react";
 import {
   Header,
   Analyzer,
   ActionCards,
   OutputScreen,
+  UnsupportedScreen,
   ActionCardItem,
 } from "./components";
 
@@ -66,8 +68,11 @@ const DEFAULT_YOUTUBE_ACTIONS: ActionCardItem[] = [
 
 export function App() {
   const [platform, setPlatform] = useState<
-    "linkedin" | "youtube" | "unknown"
-  >("linkedin");
+    "linkedin" | "youtube" | "unsupported"
+  >("unsupported");
+  const [currentUrl, setCurrentUrl] = useState("");
+  const [isDemoMode, setIsDemoMode] = useState(false);
+
   const [isConnected, setIsConnected] = useState(true);
   const [isAnalyzed, setIsAnalyzed] = useState(false);
   const [actions, setActions] = useState<ActionCardItem[]>(
@@ -86,17 +91,35 @@ export function App() {
 
   useEffect(() => {
     // Determine platform from active tab if chrome.tabs is available
-    if (typeof chrome !== "undefined" && chrome.tabs) {
+    if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const url = tabs[0]?.url || "";
+        setCurrentUrl(url);
         if (url.includes("linkedin.com")) {
           setPlatform("linkedin");
           setActions(DEFAULT_LINKEDIN_ACTIONS);
+          setIsDemoMode(false);
         } else if (url.includes("youtube.com")) {
           setPlatform("youtube");
           setActions(DEFAULT_YOUTUBE_ACTIONS);
+          setIsDemoMode(false);
+        } else {
+          setPlatform("unsupported");
         }
       });
+    } else {
+      // If outside extension context (e.g. localhost testing), check window.location
+      const url = window.location.href;
+      setCurrentUrl(url);
+      if (url.includes("linkedin.com")) {
+        setPlatform("linkedin");
+        setActions(DEFAULT_LINKEDIN_ACTIONS);
+      } else if (url.includes("youtube.com")) {
+        setPlatform("youtube");
+        setActions(DEFAULT_YOUTUBE_ACTIONS);
+      } else {
+        setPlatform("unsupported");
+      }
     }
   }, []);
 
@@ -134,7 +157,7 @@ Warm regards,
       title = "Tailored ATS Resume — Staff Frontend Engineer";
       mockMarkdown = `## ATS-Optimized Resume Bullet Points
 
-* Engineered a zero-click browser side panel using **Next.js 15 App Router** and **Manifest V3**, reducing developer workflow friction by **98%**.
+* Engineered a zero-click browser side panel using **Next.js 16 App Router** and **Manifest V3**, reducing developer workflow friction by **98%**.
 * Architected a real-time intent classification pipeline with **Google Gemini 2.5 Flash**, achieving **97.4% intent accuracy** across LinkedIn and YouTube DOMs.
 * Implemented strict Supabase **Row Level Security (RLS)** triggers to ensure zero-log session privacy and multi-tenant isolation.`;
     } else if (actionId === "smart_notes") {
@@ -167,7 +190,10 @@ Warm regards,
       title,
       badgeText: chosen?.badgeText || "Instant",
       markdownContent: mockMarkdown,
-      sourceUrl: "https://www.linkedin.com/jobs/view/staff-frontend-engineer",
+      sourceUrl:
+        platform === "youtube"
+          ? "https://www.youtube.com/watch?v=agentic-web-2026"
+          : "https://www.linkedin.com/jobs/view/staff-frontend-engineer",
     });
 
     setIsExecuting(false);
@@ -175,35 +201,68 @@ Warm regards,
 
   return (
     <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col relative w-[420px] overflow-x-hidden">
-      <Header platform={platform} isConnected={isConnected} />
+      <Header
+        platform={platform === "unsupported" && isDemoMode ? "linkedin" : platform}
+        isConnected={isConnected}
+      />
+
+      {/* Explicit Demo Mode Banner */}
+      {platform === "unsupported" && isDemoMode && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-purple-500/20 to-blue-500/20 border-b border-amber-500/30 px-4 py-2 flex items-center justify-between text-[11px] text-amber-300 font-medium shrink-0">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <span>⚠️ DEMO MODE — SYNTHETIC PREVIEW DATA</span>
+          </div>
+          <button
+            onClick={() => setIsDemoMode(false)}
+            className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[10px] underline"
+          >
+            <span>Exit Demo</span>
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      )}
 
       <main className="flex-1 p-5 space-y-6 overflow-y-auto pb-12">
-        {/* Intent Analyzer Section */}
-        <Analyzer
-          platform={platform}
-          intentLabel={
-            platform === "linkedin" ? "Applying for Job" : "Learning"
-          }
-          confidenceScore={platform === "linkedin" ? 98 : 96}
-          summary={
-            platform === "linkedin"
-              ? "You are viewing a Staff Frontend Engineer position at Anthropic in San Francisco, CA."
-              : 'You are watching "Building Production-Ready Agentic Web Apps in 2026" by Google DeepMind.'
-          }
-          onAnalysisComplete={() => setIsAnalyzed(true)}
-        />
-
-        {/* Action Cards Section */}
-        {isAnalyzed && (
-          <ActionCards
-            actions={actions}
-            onSelectAction={handleSelectAction}
-            isExecuting={isExecuting}
+        {platform === "unsupported" && !isDemoMode ? (
+          <UnsupportedScreen
+            currentUrl={currentUrl}
+            onEnableDemoMode={() => setIsDemoMode(true)}
           />
+        ) : (
+          <>
+            {/* Intent Analyzer Section */}
+            <Analyzer
+              platform={
+                platform === "unsupported" && isDemoMode
+                  ? "linkedin"
+                  : platform
+              }
+              intentLabel={
+                platform === "youtube" ? "Learning" : "Applying for Job"
+              }
+              confidenceScore={platform === "youtube" ? 96 : 98}
+              summary={
+                platform === "youtube"
+                  ? 'You are watching "Building Production-Ready Agentic Web Apps in 2026" by Google DeepMind.'
+                  : "You are viewing a Staff Frontend Engineer position at Anthropic in San Francisco, CA."
+              }
+              onAnalysisComplete={() => setIsAnalyzed(true)}
+            />
+
+            {/* Action Cards Section */}
+            {isAnalyzed && (
+              <ActionCards
+                actions={actions}
+                onSelectAction={handleSelectAction}
+                isExecuting={isExecuting}
+              />
+            )}
+          </>
         )}
       </main>
 
-      {/* Slide-in Output Screen */}
+      {/* Slide-over Output Screen */}
       <AnimatePresence>
         {selectedAction && (
           <OutputScreen

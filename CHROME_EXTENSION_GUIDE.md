@@ -20,9 +20,19 @@ chrome-extension/
 │   ├── index.css              # Custom Apple/Arc dark glassmorphism styling
 │   └── components/
 │       ├── ActionCards.tsx    # 4 high-signal action cards with Raycast keyboard shortcuts
+│       ├── UnsupportedScreen.tsx # Domain verification screen preventing mock/stale data on invalid URLs
 │       └── OutputScreen.tsx   # Executive Markdown modal with instant Copy & Download .MD
 └── dist/                      # Compiled production extension bundle (load this unpacked)
 ```
+
+---
+
+## 2. Supported Website Domain Detection & Zero Mock Data Guarantee
+
+Promptless AI enforces **Strict Domain Verification** (`App.tsx` & `UnsupportedScreen.tsx`):
+1. **Never Display Stale/Mock Data on Unsupported URLs**: If an end user opens the extension on `chrome://extensions`, `google.com`, or any website that is not `linkedin.com` or `youtube.com`, the extension **never** displays fake job titles, confidence scores, or action cards.
+2. **Unsupported Screen UI**: Surfaces an amber alert badge showing the `Current Website` domain, active supported platform buttons (`[Open LinkedIn Jobs]` / `[Open YouTube Lectures]`), and clear pipeline instructions.
+3. **Explicit Synthetic Demo Mode**: Synthetic preview cards can only be inspected if the user explicitly clicks **`[✨ Preview in synthetic Demo Mode]`** at the bottom of the unsupported screen, which renders a persistent gold warning header: `⚠️ DEMO MODE — SYNTHETIC PREVIEW DATA`.
 
 ---
 

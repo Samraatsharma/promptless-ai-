@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 interface AnalyzerProps {
-  platform: "linkedin" | "youtube" | "unknown";
+  platform: "linkedin" | "youtube" | "unsupported" | "unknown";
   intentLabel: string;
   confidenceScore: number;
   summary: string;
