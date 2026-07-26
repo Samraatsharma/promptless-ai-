@@ -1,6 +1,11 @@
-import React from "react";
-import { Sparkles } from "lucide-react";
+import React, { useState } from "react";
+import { Sparkles, Volume2, VolumeX } from "lucide-react";
 import { PromptlessLogo } from "./PromptlessLogo";
+import {
+  isSoundEnabled,
+  setSoundEnabled,
+  playClickSound,
+} from "../lib/utils/sound-effects";
 
 interface HeaderProps {
   platform: "linkedin" | "youtube" | "unsupported" | "unknown";
@@ -8,6 +13,17 @@ interface HeaderProps {
 }
 
 export function Header({ platform, isConnected }: HeaderProps) {
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
+  const handleToggleSound = () => {
+    const nextState = !soundOn;
+    setSoundEnabled(nextState);
+    setSoundOn(nextState);
+    if (nextState) {
+      playClickSound();
+    }
+  };
+
   const getBadgeText = () => {
     switch (platform) {
       case "linkedin":
@@ -47,8 +63,25 @@ export function Header({ platform, isConnected }: HeaderProps) {
         </div>
       </div>
 
-      {/* Domain Badge & Status */}
+      {/* Domain Badge, Sound Toggle & Status */}
       <div className="flex items-center gap-2">
+        {/* Futuristic Audio HUD Toggle */}
+        <button
+          onClick={handleToggleSound}
+          title={soundOn ? "Mute Sci-Fi HUD Audio" : "Enable Sci-Fi HUD Audio"}
+          className={`p-1.5 rounded-lg border transition-colors ${
+            soundOn
+              ? "bg-cyan-500/20 border-cyan-500/40 text-cyan-400"
+              : "bg-white/5 border-white/10 text-zinc-500 hover:text-zinc-300"
+          }`}
+        >
+          {soundOn ? (
+            <Volume2 className="w-3.5 h-3.5" />
+          ) : (
+            <VolumeX className="w-3.5 h-3.5" />
+          )}
+        </button>
+
         <div
           className={`px-2.5 py-1 rounded-full text-[11px] font-semibold border flex items-center gap-1.5 ${getBadgeColor()}`}
         >

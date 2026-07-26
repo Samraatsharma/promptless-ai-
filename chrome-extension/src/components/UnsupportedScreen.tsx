@@ -1,5 +1,6 @@
 import React from "react";
 import { Globe, ExternalLink, Play, AlertCircle, Sparkles } from "lucide-react";
+import { AICore } from "./AICore";
 
 interface UnsupportedScreenProps {
   currentUrl: string;
@@ -31,10 +32,13 @@ export function UnsupportedScreen({
 
   return (
     <div className="flex flex-col items-center justify-center text-center p-6 space-y-6 animate-in fade-in duration-300">
-      {/* Alert Icon & Header */}
-      <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center shadow-lg shadow-amber-500/5">
-        <AlertCircle className="w-7 h-7 text-amber-400" />
-      </div>
+      {/* JARVIS & Vision Pro Holographic AI Core Visualizer */}
+      <AICore
+        state="idle"
+        size={76}
+        label="Standby Mode Active"
+        sublabel="Awaiting supported website context"
+      />
 
       <div className="space-y-1.5">
         <h2 className="text-lg font-bold tracking-tight text-white">

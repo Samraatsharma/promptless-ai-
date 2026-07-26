@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { playClickSound, playSuccessSound } from "../lib/utils/sound-effects";
 import {
   Sparkles,
   Send,
@@ -176,9 +177,11 @@ Based on your current active browser tab (**${targetContextName}**):
     }
 
     setIsGenerating(false);
+    playSuccessSound();
   };
 
   const handleCopy = (id: string, text: string) => {
+    playClickSound();
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);

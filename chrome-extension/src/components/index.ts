@@ -5,3 +5,5 @@ export * from "./OutputScreen";
 export * from "./UnsupportedScreen";
 export * from "./AskPromptless";
 export * from "./PromptlessLogo";
+export * from "./AICore";
+export * from "./AuroraCanvas";

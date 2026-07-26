@@ -17,6 +17,8 @@ import {
   UnsupportedScreen,
   AskPromptless,
   PromptlessLogo,
+  AICore,
+  AuroraCanvas,
   ActionCardItem,
 } from "./components";
 import {
@@ -198,9 +200,8 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col relative w-[420px] overflow-x-hidden font-sans select-none">
-      {/* EXTENSION UI 3.0: Animated Aurora Background Light */}
-      <div className="fixed -top-24 -left-24 w-72 h-72 bg-gradient-to-br from-blue-600/15 via-purple-600/15 to-pink-600/15 rounded-full blur-3xl pointer-events-none animate-pulse" />
-      <div className="fixed -bottom-24 -right-24 w-72 h-72 bg-gradient-to-tr from-emerald-600/10 via-blue-600/10 to-purple-600/15 rounded-full blur-3xl pointer-events-none" />
+      {/* EXTENSION UI 3.0: Cinematic Aurora Canvas & Neural HUD Background */}
+      <AuroraCanvas platform={platform} />
 
       {/* Top Header */}
       <Header
@@ -253,17 +254,9 @@ export function App() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="py-14 flex flex-col items-center justify-center text-center space-y-3"
+            className="py-10 flex flex-col items-center justify-center text-center"
           >
-            <PromptlessLogo size={56} variant="gradient" animated={true} />
-            <div>
-              <h3 className="text-sm font-bold text-white tracking-wide">
-                Analyzing current page...
-              </h3>
-              <p className="text-[11px] text-zinc-500 mt-0.5">
-                Extracting context & synthesizing zero-click actions
-              </p>
-            </div>
+            <AICore state="scanning" size={88} />
           </motion.div>
         ) : platform === "unsupported" && !isDemoMode ? (
           /* Unsupported Domain Protection */
@@ -274,6 +267,23 @@ export function App() {
         ) : (
           /* SUPPORTED DOMAIN WORKSPACE (Arc / Raycast / Linear aesthetic) */
           <>
+            {/* 0. JARVIS & Vision Pro Holographic AI Core Visualizer */}
+            <AICore
+              state={isExecuting ? "generating" : "idle"}
+              size={64}
+              label={
+                isExecuting
+                  ? "Generating Action Output..."
+                  : "AI Operating System Online"
+              }
+              sublabel={
+                isExecuting
+                  ? "Synthesizing verified high-signal response"
+                  : "Zero-click context intelligence ready"
+              }
+              className="py-1"
+            />
+
             {/* 1. Consumer Hero Banner (Rule 1: Internal reasoning hidden) */}
             <Analyzer
               platform={

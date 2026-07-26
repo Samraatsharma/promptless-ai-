@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { playSuccessSound, playClickSound } from "../lib/utils/sound-effects";
 import {
   ArrowLeft,
   Copy,
@@ -72,20 +73,24 @@ export function OutputScreen({
       return () => clearInterval(interval);
     } else {
       setLoadingIndex(LOADING_STATES.length - 1);
+      playSuccessSound();
     }
   }, [isGenerating]);
 
   const handleCopy = () => {
+    playClickSound();
     navigator.clipboard.writeText(markdownContent);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleBookmark = () => {
+    playClickSound();
     setBookmarked(!bookmarked);
   };
 
   const handleShare = () => {
+    playClickSound();
     if (navigator.share) {
       navigator.share({
         title,

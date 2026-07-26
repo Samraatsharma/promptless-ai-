@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { playClickSound } from "../lib/utils/sound-effects";
 import {
   Briefcase,
   FileText,
@@ -123,9 +124,16 @@ export function ActionCards({
             key={action.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.04 }}
-            onClick={() => !isExecuting && onSelectAction(action.id)}
-            className={`group p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-blue-500/40 transition-all cursor-pointer shadow-md relative overflow-hidden ${
+            whileHover={{ scale: 1.015, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            onClick={() => {
+              if (!isExecuting) {
+                playClickSound();
+                onSelectAction(action.id);
+              }
+            }}
+            className={`group p-3.5 rounded-xl bg-white/[0.03] hover:bg-gradient-to-r hover:from-cyan-500/[0.07] hover:via-purple-500/[0.07] hover:to-pink-500/[0.07] border border-white/10 hover:border-cyan-400/50 transition-all cursor-pointer shadow-lg hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] relative overflow-hidden ${
               isExecuting ? "opacity-50 pointer-events-none" : ""
             }`}
           >
