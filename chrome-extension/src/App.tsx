@@ -9,62 +9,10 @@ import {
   UnsupportedScreen,
   ActionCardItem,
 } from "./components";
-
-const DEFAULT_LINKEDIN_ACTIONS: ActionCardItem[] = [
-  {
-    id: "cover_letter",
-    title: "Generate Cover Letter",
-    description:
-      "Handcraft executive cover letter tailored to this role and company.",
-    iconName: "FileText",
-    confidence: 98,
-    badgeText: "High Signal",
-  },
-  {
-    id: "resume_tailoring",
-    title: "Tailor Resume Bullet Points",
-    description: "Align skills and ATS keywords with extracted job requirements.",
-    iconName: "Briefcase",
-    confidence: 96,
-    badgeText: "ATS Fit",
-  },
-  {
-    id: "company_research",
-    title: "Company Research Brief",
-    description: "Summarize mission, culture, and news for this organization.",
-    iconName: "Search",
-    confidence: 92,
-    badgeText: "Executive",
-  },
-];
-
-const DEFAULT_YOUTUBE_ACTIONS: ActionCardItem[] = [
-  {
-    id: "smart_notes",
-    title: "Generate Smart Notes",
-    description:
-      "Hierarchical study notes with timestamps and key definitions.",
-    iconName: "BookOpen",
-    confidence: 97,
-    badgeText: "Instant",
-  },
-  {
-    id: "smart_summary",
-    title: "2-Minute Executive Summary",
-    description: "Distill the presenter's thesis into 5 core takeaways.",
-    iconName: "FileText",
-    confidence: 94,
-    badgeText: "High Signal",
-  },
-  {
-    id: "quiz",
-    title: "Interactive Flashcard Quiz",
-    description: "Test retention with 5 instant Q&A practice pairs.",
-    iconName: "Award",
-    confidence: 91,
-    badgeText: "Spaced Rep",
-  },
-];
+import {
+  analyzeContextEngine,
+  ContextEngineResult,
+} from "./lib/context-engine";
 
 export function App() {
   const [platform, setPlatform] = useState<
@@ -73,11 +21,12 @@ export function App() {
   const [currentUrl, setCurrentUrl] = useState("");
   const [isDemoMode, setIsDemoMode] = useState(false);
 
+  const [engineResult, setEngineResult] = useState<ContextEngineResult | null>(
+    null
+  );
   const [isConnected, setIsConnected] = useState(true);
   const [isAnalyzed, setIsAnalyzed] = useState(false);
-  const [actions, setActions] = useState<ActionCardItem[]>(
-    DEFAULT_LINKEDIN_ACTIONS
-  );
+  const [actions, setActions] = useState<ActionCardItem[]>([]);
 
   const [selectedAction, setSelectedAction] = useState<{
     id: string;
@@ -89,100 +38,134 @@ export function App() {
 
   const [isExecuting, setIsExecuting] = useState(false);
 
+  // Helper to run hierarchical Context Engine & reset state
+  const evaluateUrlContext = (url: string, pageTitle?: string) => {
+    setCurrentUrl(url);
+    // STATE MANAGEMENT: Immediately reset analysis & active modals on URL/SPA navigation
+    setIsAnalyzed(false);
+    setSelectedAction(null);
+
+    const result = analyzeContextEngine(url, pageTitle);
+    setEngineResult(result);
+    setActions(result.actions);
+
+    if (result.website === "LinkedIn") {
+      setPlatform("linkedin");
+      setIsDemoMode(false);
+    } else if (result.website === "YouTube") {
+      setPlatform("youtube");
+      setIsDemoMode(false);
+    } else {
+      setPlatform("unsupported");
+    }
+  };
+
   useEffect(() => {
-    // Determine platform from active tab if chrome.tabs is available
+    // 1. Check active tab URL on initial load
     if (typeof chrome !== "undefined" && chrome.tabs && chrome.tabs.query) {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         const url = tabs[0]?.url || "";
-        setCurrentUrl(url);
-        if (url.includes("linkedin.com")) {
-          setPlatform("linkedin");
-          setActions(DEFAULT_LINKEDIN_ACTIONS);
-          setIsDemoMode(false);
-        } else if (url.includes("youtube.com")) {
-          setPlatform("youtube");
-          setActions(DEFAULT_YOUTUBE_ACTIONS);
-          setIsDemoMode(false);
-        } else {
-          setPlatform("unsupported");
-        }
+        const title = tabs[0]?.title || "";
+        evaluateUrlContext(url, title);
       });
-    } else {
-      // If outside extension context (e.g. localhost testing), check window.location
-      const url = window.location.href;
-      setCurrentUrl(url);
-      if (url.includes("linkedin.com")) {
-        setPlatform("linkedin");
-        setActions(DEFAULT_LINKEDIN_ACTIONS);
-      } else if (url.includes("youtube.com")) {
-        setPlatform("youtube");
-        setActions(DEFAULT_YOUTUBE_ACTIONS);
-      } else {
-        setPlatform("unsupported");
+
+      // 2. Listen for SPA Navigation & tab updates from content script / background worker
+      const handleMessage = (message: any) => {
+        if (
+          message.type === "PAGE_CONTEXT_UPDATED" ||
+          message.type === "URL_CHANGED"
+        ) {
+          if (message.url && message.url !== currentUrl) {
+            evaluateUrlContext(
+              message.url,
+              message.context?.data?.jobTitle ||
+                message.context?.data?.videoTitle
+            );
+          }
+        }
+      };
+
+      if (chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener(handleMessage);
       }
+
+      return () => {
+        if (chrome.runtime && chrome.runtime.onMessage) {
+          chrome.runtime.onMessage.removeListener(handleMessage);
+        }
+      };
+    } else {
+      // Localhost / Web testing environment fallback
+      const url = window.location.href;
+      evaluateUrlContext(url, document.title);
     }
-  }, []);
+  }, [currentUrl]);
 
   const handleSelectAction = async (actionId: string) => {
     setIsExecuting(true);
     const chosen = actions.find((a) => a.id === actionId);
 
     // Simulate short Gemini execution delay
-    await new Promise((res) => setTimeout(res, 900));
+    await new Promise((res) => setTimeout(res, 850));
 
     let mockMarkdown = "";
     let title = chosen?.title || "AI Output";
 
-    if (actionId === "cover_letter") {
-      title = "Cover Letter — Staff Frontend Engineer (Anthropic)";
-      mockMarkdown = `## Executive Cover Letter — Staff Frontend Engineer
+    if (actionId.includes("cover_letter")) {
+      title = `Cover Letter — ${engineResult?.pageType || "Job Application"}`;
+      mockMarkdown = `## Executive Cover Letter — Tailored Application
 
-**To:** Hiring Team at **Anthropic**  
-**Role:** Staff Frontend Engineer (San Francisco, CA)
+**To:** Hiring Manager / Talent Team  
+**Role:** ${engineResult?.summaryText || "Target Engineering Position"}
 
-Dear Hiring Manager at Anthropic,
+Dear Hiring Team,
 
-I am writing to express my strong enthusiasm for the Staff Frontend Engineer role. Having engineered low-latency, agentic web interfaces using **React 19**, **TypeScript**, and **Framer Motion**, I am inspired by your mission to build interpretable, high-signal AI systems.
+I am writing to express my enthusiastic interest in this opportunity. With experience architecting zero-click browser side panels and high-performance serverless AI applications using **React 19**, **Next.js 16**, and **Google Gemini 2.5 Flash**, my background aligns directly with your technical objectives.
 
-### Key Technical Contributions You Can Expect:
-* **Zero-Click Intent Architectures:** Demonstrated expertise replacing chat textboxes with contextual DOM comprehension and browser side panels.
-* **60 FPS High-Frequency UI:** Skilled in Apple/Linear-inspired glassmorphism and motion transitions that clearly communicate AI reasoning states.
-* **Manifest V3 Side Panels:** Proven track record deploying secure, sandboxed browser extensions.
+### Core Technical Highlights:
+* **Contextual AI Engineering:** Built hierarchical Context Engines that infer intent from live DOM activity with >95% accuracy.
+* **Low-Latency Glassmorphic UI:** Engineered Apple/Arc-inspired 60 FPS interfaces.
+* **Manifest V3 Side Panels:** Experienced building secure browser extensions with SPA MutationObservers.
 
-I welcome the opportunity to discuss how my frontend architecture can contribute to Anthropic immediately.
+I look forward to discussing how my skills can contribute immediately.
 
 Warm regards,  
 **Samraat Sharma**`;
-    } else if (actionId === "resume_tailoring") {
-      title = "Tailored ATS Resume — Staff Frontend Engineer";
-      mockMarkdown = `## ATS-Optimized Resume Bullet Points
+    } else if (actionId.includes("resume_tailoring")) {
+      title = "ATS-Optimized Resume Keywords & Bullets";
+      mockMarkdown = `## ATS-Optimized Resume Alignment
 
 * Engineered a zero-click browser side panel using **Next.js 16 App Router** and **Manifest V3**, reducing developer workflow friction by **98%**.
-* Architected a real-time intent classification pipeline with **Google Gemini 2.5 Flash**, achieving **97.4% intent accuracy** across LinkedIn and YouTube DOMs.
+* Architected a hierarchical Context Engine with **Google Gemini 2.5 Flash**, achieving **97% intent accuracy** across LinkedIn and YouTube DOMs.
 * Implemented strict Supabase **Row Level Security (RLS)** triggers to ensure zero-log session privacy and multi-tenant isolation.`;
-    } else if (actionId === "smart_notes") {
-      title = "Smart Notes — Agentic Web Apps in 2026";
-      mockMarkdown = `## Hierarchical Study Notes — "Building Agentic Web Apps in 2026"
+    } else if (actionId.includes("smart_notes") || actionId.includes("notes")) {
+      title = `Smart Notes — ${engineResult?.activity || "YouTube Video"}`;
+      mockMarkdown = `## Hierarchical Study Notes — ${engineResult?.summaryText || "Technical Lecture"}
 
-**Source:** Google DeepMind Engineering Channel  
-**Platform:** YouTube Education  
+**Source:** YouTube Education / Technical Channel  
+**Intent:** ${engineResult?.intent || "Learning"}  
 
 ---
 
-### 1. The End of the Chatbox
-* **Problem:** Asking users to copy web text, switch tabs, and type prompt instructions introduces high friction (~3 minutes/task).
-* **Solution:** Predictive DOM understanding allows software to determine user intent automatically without text boxes.
+### 1. Key Concepts Covered
+* **Hierarchical Context Engines:** Why domain-only detection fails and how page-type + activity parsing solves intent accuracy.
+* **SPA Navigation Support:** Using MutationObservers to detect URL changes without full page reloads.
 
-### 2. Implementation Principles
-* **3-Card Maximum:** Surface no more than 3 clear, high-signal suggestions in the Side Panel.
-* **60 FPS Motion:** Use Framer Motion and glassmorphic styling for a premium user experience.`;
+### 2. Implementation Checklist
+* **3-Tier Confidence System:** Separate scores for Website, Page Type, and User Intent.
+* **80% Confidence Guard:** Preventing guessing or hallucinated actions when confidence is below 80%.`;
     } else {
-      title = "Executive Summary — Agentic Web Apps";
-      mockMarkdown = `## 2-Minute Executive Summary
+      title = `${chosen?.title || "Executive Summary"} — Promptless AI`;
+      mockMarkdown = `## ${chosen?.title || "AI Output Analysis"}
 
-1. **Thesis:** Chatbot textboxes are inefficient for repetitive web workflows on LinkedIn and YouTube.
-2. **Architecture:** Promptless AI uses Manifest V3 Side Panels to read DOM context automatically and surface predictive zero-click actions.
-3. **Impact:** Reduces task completion time from 3 minutes to under 3 seconds while maintaining SOC-2 compliant zero-log privacy.`;
+1. **Active Website:** \`${engineResult?.website || "Platform"}\`
+2. **Detected Page Type:** \`${engineResult?.pageType || "Page"}\`
+3. **User Activity:** \`${engineResult?.activity || "Browsing"}\`
+4. **Inferred Intent:** \`${engineResult?.intent || "Content Discovery"}\`
+5. **Confidence Matrix:**
+   - Website: **${engineResult?.confidence.website || 100}%**
+   - Page Type: **${engineResult?.confidence.page || 96}%**
+   - User Intent: **${engineResult?.confidence.intent || 92}%**`;
     }
 
     setSelectedAction({
@@ -190,10 +173,7 @@ Warm regards,
       title,
       badgeText: chosen?.badgeText || "Instant",
       markdownContent: mockMarkdown,
-      sourceUrl:
-        platform === "youtube"
-          ? "https://www.youtube.com/watch?v=agentic-web-2026"
-          : "https://www.linkedin.com/jobs/view/staff-frontend-engineer",
+      sourceUrl: currentUrl || "https://promptless-ai.vercel.app",
     });
 
     setIsExecuting(false);
@@ -202,7 +182,9 @@ Warm regards,
   return (
     <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col relative w-[420px] overflow-x-hidden">
       <Header
-        platform={platform === "unsupported" && isDemoMode ? "linkedin" : platform}
+        platform={
+          platform === "unsupported" && isDemoMode ? "linkedin" : platform
+        }
         isConnected={isConnected}
       />
 
@@ -231,7 +213,7 @@ Warm regards,
           />
         ) : (
           <>
-            {/* Intent Analyzer Section */}
+            {/* Hierarchical Context Engine Analyzer */}
             <Analyzer
               platform={
                 platform === "unsupported" && isDemoMode
@@ -239,13 +221,14 @@ Warm regards,
                   : platform
               }
               intentLabel={
-                platform === "youtube" ? "Learning" : "Applying for Job"
+                engineResult?.intent ||
+                (platform === "youtube" ? "Learning" : "Applying for Job")
               }
-              confidenceScore={platform === "youtube" ? 96 : 98}
+              confidenceScore={engineResult?.confidence.intent || 96}
+              confidenceScores={engineResult?.confidence}
               summary={
-                platform === "youtube"
-                  ? 'You are watching "Building Production-Ready Agentic Web Apps in 2026" by Google DeepMind.'
-                  : "You are viewing a Staff Frontend Engineer position at Anthropic in San Francisco, CA."
+                engineResult?.summaryText ||
+                "Analyzing active page hierarchy and DOM context..."
               }
               onAnalysisComplete={() => setIsAnalyzed(true)}
             />

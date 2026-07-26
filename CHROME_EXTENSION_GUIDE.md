@@ -18,12 +18,28 @@ chrome-extension/
 │   ├── main.tsx               # Side Panel React 19 bootstrap
 │   ├── App.tsx                # Main Side Panel UI container (Intent detection & action routing)
 │   ├── index.css              # Custom Apple/Arc dark glassmorphism styling
+│   ├── lib/
+│   │   └── context-engine.ts  # Hierarchical Context Engine (Website -> Page -> Activity -> Intent -> Actions)
 │   └── components/
 │       ├── ActionCards.tsx    # 4 high-signal action cards with Raycast keyboard shortcuts
 │       ├── UnsupportedScreen.tsx # Domain verification screen preventing mock/stale data on invalid URLs
 │       └── OutputScreen.tsx   # Executive Markdown modal with instant Copy & Download .MD
 └── dist/                      # Compiled production extension bundle (load this unpacked)
 ```
+
+---
+
+## 2. Hierarchical Context Engine & Domain Verification
+
+Promptless AI replaces simplistic domain-only guessing with a **Hierarchical 6-Step Context Engine** (`lib/context-engine.ts`):
+1. **Step 1 — Detect Website**: Classifies URL (LinkedIn, YouTube, GitHub, Notion, Gmail, Google Docs, or Unsupported).
+2. **Step 2 — Detect Page Type**: Parses routes (`/feed`, `/jobs/search`, `/jobs/view`, `/in/`, `/messaging`, `/watch`, `/shorts`, `/playlist`, `/channel`, `/results`, `/`).
+3. **Step 3 — Extract Page Context**: Reads live DOM metadata without fabricating or hallucinating data.
+4. **Step 4 — Determine User Activity**: Maps page type to activity (e.g. `Reading Job`, `Searching Jobs`, `Editing Profile`, `Watching Video`, `Browsing Channel`).
+5. **Step 5 — Infer Intent & 80% Confidence Guard**: Maps activity to intent. If confidence `< 80%`, displays: `"We're not yet confident about what you're trying to do."` and offers only general-purpose actions.
+6. **Step 6 — Dynamic Action Generation**: Renders actions tailored strictly to the current Website + Page Type + Activity + Intent. Never shows resume actions outside a job page.
+7. **Immediate State Reset**: Whenever a URL change, SPA navigation, or tab change occurs, all previous analysis and cards are reset immediately.
+8. **3-Tier Confidence Badges**: Separate confidence display for `Website`, `Page Type`, and `Intent`.
 
 ---
 

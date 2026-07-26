@@ -10,9 +10,11 @@ export function Header({ platform, isConnected }: HeaderProps) {
   const getBadgeText = () => {
     switch (platform) {
       case "linkedin":
-        return "LinkedIn Job Detected";
+        return "LinkedIn Page Active";
       case "youtube":
-        return "YouTube Video Detected";
+        return "YouTube Page Active";
+      case "unsupported":
+        return "Unsupported Domain";
       default:
         return "Waiting for Page...";
     }
