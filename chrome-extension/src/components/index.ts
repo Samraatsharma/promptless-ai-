@@ -7,3 +7,5 @@ export * from "./AskPromptless";
 export * from "./PromptlessLogo";
 export * from "./AICore";
 export * from "./AuroraCanvas";
+export * from "./SplashScreen";
+export * from "./ScanningScreen";

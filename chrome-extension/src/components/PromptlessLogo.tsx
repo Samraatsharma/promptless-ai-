@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 export interface PromptlessLogoProps {
   size?: number;
-  variant?: "dark" | "light" | "monochrome" | "accent" | "gradient";
+  variant?: "dark" | "light" | "white" | "monochrome" | "accent" | "gradient";
   animated?: boolean;
   className?: string;
 }
@@ -31,6 +31,8 @@ export const PromptlessLogo: React.FC<PromptlessLogoProps> = ({
         return { start: "#09090b", end: "#3f3f46" };
       case "dark":
         return { start: "#ffffff", end: "#a1a1aa" };
+      case "white":
+        return { start: "#ffffff", end: "#ffffff" };
       case "monochrome":
         return { start: "currentColor", end: "currentColor" };
       case "accent":
