@@ -75,17 +75,43 @@ export function AnimatedBrowserDemo() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Interactive Scenario Controls */}
-      <div className="flex items-center justify-between mb-4 px-2">
+      {/* Interactive Scenario Controls & Step Inspector */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4 px-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#71717a]">
             Live Browser Demo — Click to Interact
           </span>
-          {isPaused && (
-            <span className="text-xs text-[#4F8DFF] font-medium animate-pulse">
-              (Paused on Hover)
-            </span>
-          )}
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className="text-xs px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[#4F8DFF] font-medium hover:bg-white/10 transition-colors flex items-center gap-1"
+          >
+            <span>{isPaused ? "▶ Resume Auto-Loop" : "⏸ Pause"}</span>
+          </button>
+        </div>
+
+        {/* Step Inspector Pill Toolbar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1 sm:pb-0">
+          {ANALYZER_STEPS.map((step, idx) => (
+            <button
+              key={step.id}
+              onClick={() => {
+                setStepIndex(idx);
+                setIsPaused(true);
+                if (idx === ANALYZER_STEPS.length - 1 && !selectedCard) {
+                  setSelectedCard(
+                    scenario === "linkedin" ? "cover_letter" : "smart_notes"
+                  );
+                }
+              }}
+              className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all whitespace-nowrap border ${
+                stepIndex === idx
+                  ? "bg-white/10 border-[#4F8DFF]/40 text-white shadow-[0_0_10px_rgba(79,141,255,0.2)]"
+                  : "bg-transparent border-transparent text-[#71717a] hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {idx + 1}. {step.label}
+            </button>
+          ))}
         </div>
 
         <div className="flex items-center gap-2 bg-white/5 p-1 rounded-full border border-white/10">
@@ -101,7 +127,7 @@ export function AnimatedBrowserDemo() {
                 : "text-[#71717a] hover:text-white"
             }`}
           >
-            LinkedIn Job Application
+            LinkedIn Job
           </button>
           <button
             onClick={() => {
@@ -115,7 +141,7 @@ export function AnimatedBrowserDemo() {
                 : "text-[#71717a] hover:text-white"
             }`}
           >
-            YouTube Video Learning
+            YouTube Video
           </button>
         </div>
       </div>
@@ -403,7 +429,15 @@ export function AnimatedBrowserDemo() {
                   {scenario === "linkedin" ? (
                     <>
                       <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setSelectedCard("cover_letter")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedCard("cover_letter");
+                          }
+                        }}
                         className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                           selectedCard === "cover_letter"
                             ? "bg-[#4F8DFF]/15 border-[#4F8DFF] shadow-[0_0_20px_rgba(79,141,255,0.25)]"
@@ -427,7 +461,15 @@ export function AnimatedBrowserDemo() {
                       </div>
 
                       <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setSelectedCard("resume")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedCard("resume");
+                          }
+                        }}
                         className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                           selectedCard === "resume"
                             ? "bg-[#4F8DFF]/15 border-[#4F8DFF]"
@@ -453,7 +495,15 @@ export function AnimatedBrowserDemo() {
                   ) : (
                     <>
                       <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setSelectedCard("smart_notes")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedCard("smart_notes");
+                          }
+                        }}
                         className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                           selectedCard === "smart_notes"
                             ? "bg-[#8B5CF6]/15 border-[#8B5CF6] shadow-[0_0_20px_rgba(139,92,246,0.25)]"
@@ -477,7 +527,15 @@ export function AnimatedBrowserDemo() {
                       </div>
 
                       <div
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setSelectedCard("quiz")}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedCard("quiz");
+                          }
+                        }}
                         className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
                           selectedCard === "quiz"
                             ? "bg-[#8B5CF6]/15 border-[#8B5CF6]"

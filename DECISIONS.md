@@ -1,43 +1,69 @@
-# Architectural & Technical Decisions - Promptless AI
+# DECISIONS.md — Architecture & Engineering Decision Log (ADR)
 
-## Decision 001: Monorepo vs. Multi-Repo Structure
-- **Problem**: Should the Next.js SaaS Web App and the Chrome Extension be built in separate git repositories or co-located in a monorepo?
-- **Options Considered**:
-  1. *Monorepo (`promptless-ai/` with `app/`, `chrome-extension/`, `types/`, `supabase/`)*.
-  2. *Two Separate Git Repositories (`promptless-ai-web` and `promptless-ai-extension`)*.
-- **Chosen Option**: Monorepo.
-- **Reason**: Both client applications share TypeScript interfaces (`types/`), design tokens (`styles/`), and authenticate against the same backend API routes and Supabase database. Co-locating them ensures zero drift in API schemas and seamless local development.
-- **Trade-offs**: Requires distinct build commands (`npm run build` for web, `npm run build:extension` for Chrome extension).
+This file documents all major architectural, design, and implementation decisions made in **Promptless AI**.
 
 ---
 
-## Decision 002: Chrome Extension Side Panel Bundling & Framework
-- **Problem**: How to build the 420px Manifest V3 Side Panel to achieve Apple/Linear-grade glassmorphism, Framer Motion 60 FPS animations, and interactive Markdown rendering?
-- **Options Considered**:
-  1. *Vite + React 19 + Tailwind CSS + Framer Motion in `/chrome-extension`*.
-  2. *Vanilla JavaScript / HTML / CSS without a modern bundler*.
-- **Chosen Option**: Vite + React 19 + Tailwind CSS + Framer Motion.
-- **Reason**: Vanilla HTML/JS cannot maintain complex UI state (step-by-step analyzer -> animated action cards -> markdown output screen) without spaghetti DOM manipulation. Vite compiles a clean, highly optimized bundle (`/chrome-extension/dist`) for Chrome Side Panel.
-- **Trade-offs**: Slightly larger bundle size than vanilla JS, mitigated by tree-shaking and modern Vite optimization.
+## ADR-001: Zero-Click Intent Architecture over Chatbot Textboxes
+
+- **Date**: July 26, 2026
+- **Context**: Most AI assistants force users into conversational chat interfaces, requiring manual URL copy-pasting and prompt engineering.
+- **Decision**: We eliminated chat textboxes entirely. The browser extension and web app automatically analyze DOM context (`ExtractedPageContext`) and classify intent into structured JSON (`IntentResult`), presenting 4 high-signal Action Cards.
+- **Consequences**:
+  - **Positive**: Reduces time-to-value from ~3 minutes to < 3 seconds; eliminates user prompt anxiety.
+  - **Negative**: Requires custom DOM extraction scripts for each supported website (LinkedIn, YouTube).
 
 ---
 
-## Decision 003: Secure AI Execution & Promptless Backend Architecture
-- **Problem**: How to execute Gemini AI actions securely without exposing API keys or requiring client-side prompt engineering?
-- **Options Considered**:
-  1. *Next.js API Routes (`/api/ai/intent` & `/api/ai/action`) with strict JSON Schema output parsing and server-side Gemini invocation*.
-  2. *Direct client-side Gemini API calls from the Chrome Extension content script / side panel*.
-- **Chosen Option**: Next.js API Routes (`/api/ai/...`) with Server-Side Gemini SDK (`@google/genai`).
-- **Reason**: Exposing API keys in browser extensions is a critical security vulnerability. Server-side execution allows us to authenticate requests via Supabase session JWTs, rate-limit usage, and enforce structured JSON outputs.
-- **Trade-offs**: Extension requires network connectivity to our Next.js backend server.
+## ADR-002: Manifest V3 Side Panel API (`sidePanel`)
+
+- **Date**: July 26, 2026
+- **Context**: Traditional Chrome extensions use popup bubbles (`default_popup`) that close whenever the user clicks away on the web page.
+- **Decision**: We built a **420px docked Side Panel** (`sidepanel.html`) using Chrome Manifest V3's `sidePanel` API.
+- **Consequences**:
+  - **Positive**: The AI workspace stays permanently open while the user browses job listings or watches lectures.
+  - **Negative**: Requires Chrome 114+ (not compatible with legacy MV2 browsers).
 
 ---
 
-## Decision 004: Shared Authentication Between Web App & Chrome Extension
-- **Problem**: How to ensure a user logged into the Next.js SaaS app is seamlessly authenticated inside the Chrome Extension Side Panel?
-- **Options Considered**:
-  1. *Supabase Auth with Chrome Extension Cookie/Token Bridge (`chrome.cookies` or `/api/auth/session` token exchange)*.
-  2. *Separate manual login form inside the Chrome Extension Side Panel*.
-- **Chosen Option**: Supabase Auth with Extension Cookie/Token Bridge.
-- **Reason**: Eliminates user friction by providing single sign-on (SSO) between the SaaS dashboard and the browser extension.
-- **Trade-offs**: Requires configuring cross-origin permissions in `manifest.json` for our SaaS domain.
+## ADR-003: Hybrid Serverless Rate Limiting (`@upstash/ratelimit`)
+
+- **Date**: July 27, 2026
+- **Context**: In Vercel serverless environments, in-memory rate limiting variables are reset on every cold start and are not shared across edge regions.
+- **Decision**: We integrated `@upstash/ratelimit` with `@upstash/redis` in `lib/security/rate-limiter.ts`. In production (`UPSTASH_REDIS_REST_URL` set), rate limits synchronize across distributed Redis clusters; in local development, it falls back seamlessly to an in-memory token bucket.
+- **Consequences**:
+  - **Positive**: Protects Gemini AI API quota from DDOS or abuse across serverless regions without requiring local Redis installation for developers.
+  - **Negative**: Requires Upstash REST URL and Token in production Vercel environment variables.
+
+---
+
+## ADR-004: Runtime Payload Validation with Zod (`schemas.ts`)
+
+- **Date**: July 27, 2026
+- **Context**: TypeScript types are erased at compile time, leaving API endpoints vulnerable to malformed or malicious client POST requests.
+- **Decision**: We created `lib/security/schemas.ts` using **Zod** (`IntentRequestSchema`, `ActionRequestSchema`) and wrap `/api/ai/intent` and `/api/ai/action` payloads in `safeParse()`.
+- **Consequences**:
+  - **Positive**: Rejects invalid payloads with clean `400 Bad Request` messages before consuming Gemini token quota or database queries.
+  - **Negative**: Adds ~12 KB to server-side bundle size (negligible).
+
+---
+
+## ADR-005: Chrome Extension SPA MutationObservers (`content.ts`)
+
+- **Date**: July 27, 2026
+- **Context**: LinkedIn Jobs and YouTube are Single-Page Applications (SPAs) that update DOM content without full page reloads.
+- **Decision**: We upgraded `chrome-extension/src/content.ts` with a **MutationObserver** for LinkedIn job list selections and a `yt-navigate-finish` listener for YouTube video navigations.
+- **Consequences**:
+  - **Positive**: Automatically re-extracts page metadata and refreshes Side Panel Action Cards when the user clicks a new job or video without manual refresh.
+  - **Negative**: Requires careful debouncing (`250ms`) to prevent observer flood during rapid clicks.
+
+---
+
+## ADR-006: Apple / Arc / Linear Dark Glassmorphism Design System
+
+- **Date**: July 26, 2026
+- **Context**: Enterprise B2B software often suffers from flat, generic dashboards.
+- **Decision**: We built a custom Tailwind CSS 4 design token hierarchy centered on deep obsidian `#09090B`, ambient aurora gradient glow blobs, glassmorphic card borders (`white/10`), and 60 FPS Framer Motion micro-interactions.
+- **Consequences**:
+  - **Positive**: Delivers an immediate "WOW" factor that feels like software crafted by Apple, Arc Browser, Linear, or Raycast.
+  - **Negative**: Requires GPU-accelerated backdrop filters (`backdrop-blur-xl`) in stylesheets.

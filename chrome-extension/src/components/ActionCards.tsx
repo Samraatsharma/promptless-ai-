@@ -89,8 +89,13 @@ export function ActionCards({
                 </div>
               </div>
 
-              <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-[#71717a] group-hover:text-white group-hover:bg-[#4F8DFF] transition-all">
-                <ArrowRight className="w-4 h-4" />
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[#71717a] group-hover:text-white group-hover:border-[#4F8DFF]/50 transition-all">
+                  ⌘{idx + 1}
+                </span>
+                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-[#71717a] group-hover:text-white group-hover:bg-[#4F8DFF] transition-all">
+                  <ArrowRight className="w-4 h-4" />
+                </div>
               </div>
             </div>
           </motion.div>

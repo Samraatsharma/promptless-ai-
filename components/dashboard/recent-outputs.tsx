@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
 import { GeneratedContentItem } from "@/types";
 import { DashboardEmptyState } from "./empty-state";
+import { downloadMarkdownFile } from "@/lib/utils/download-markdown";
 
 interface RecentOutputsProps {
   items: GeneratedContentItem[];
@@ -250,6 +251,17 @@ export function RecentOutputs({
                   Open original source webpage
                 </a>
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={() =>
+                      downloadMarkdownFile(
+                        previewItem.title,
+                        previewItem.content_markdown
+                      )
+                    }
+                    className="px-3.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-medium text-[#f4f4f5] hover:bg-white/10 transition-colors"
+                  >
+                    Download .MD
+                  </button>
                   <CopyButton
                     text={previewItem.content_markdown}
                     label="Copy Full Markdown"

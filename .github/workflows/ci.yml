@@ -1,0 +1,48 @@
+name: Promptless AI CI — Production Quality Gate ⚡️
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  verify-quality-gates:
+    name: Build, Lint & Diagnostic Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js v20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm ci
+
+      - name: Install Chrome Extension Dependencies
+        run: npm --prefix chrome-extension ci
+
+      - name: Run ESLint Audit across Monorepo
+        run: npm exec eslint .
+
+      - name: Verify TypeScript Schema & Compilation
+        run: npx tsc --noEmit
+
+      - name: Build Manifest V3 Chrome Extension Bundle
+        run: npm --prefix chrome-extension run build
+
+      - name: Build Next.js 16 Production App Bundle
+        env:
+          GEMINI_API_KEY: AIzaSyci-mock-key-for-github-actions-build-test
+          NEXT_PUBLIC_SUPABASE_URL: https://mock-supabase-id.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-key
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+        run: npm run build
+
+      - name: Execute Automated Diagnostic CLI Health Check
+        run: node health-check.js

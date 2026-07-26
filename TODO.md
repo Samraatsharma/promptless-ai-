@@ -1,44 +1,37 @@
-# Project TODO & Task Management - Promptless AI
+# TODO.md — Active Implementation Tasks & Sprint Roadmap
 
-## 1. Completed
-- [x] Initial Architecture & System Design Plan (`implementation_plan.md`)
-- [x] Next.js 15 App Router Project Scaffolding
-- [x] Core Dependency Installation (`framer-motion`, `lucide-react`, `@supabase/supabase-js`, `@google/genai`, `vite`, `tailwindcss`)
-- [x] Permanent Documentation Architecture (`PROJECT_CONTEXT.md`, `PROJECT_PROGRESS.md`, `DECISIONS.md`, `TODO.md`, `CHANGELOG.md`, `README.md`)
-- [x] Module 2: Design System, Tailwind Theme & Premium Glassmorphism UI Primitives
-- [x] Module 3: Supabase Database Schema, SQL Migrations & Auth Architecture
-  - [x] Create `supabase/migrations/001_initial_schema.sql` (`users`, `generated_content`, `activity_history`, `preferences`)
-  - [x] Create Supabase client library (`lib/supabase/client.ts`, `lib/supabase/server.ts`)
-- [x] Module 4: High-Converting Landing Page with Animated Browser Demo Loop
-  - [x] Navigation header with animated blur badge
-  - [x] Hero section with `Large Headline`, `Subtitle`, `Primary CTA`, `Secondary CTA`
-  - [x] Animated Browser Window looping: LinkedIn Job -> Intent -> Cover Letter -> YouTube Video -> Smart Notes -> Loop
-  - [x] Features showcase, How It Works, Why Promptless AI, Footer
-- [x] Module 5: Authenticated SaaS Dashboard
-  - [x] Dark theme glass cards (`Recent Outputs`, `Saved Results`, `Profile`, `Settings`, `Usage`)
-  - [x] Beautiful Empty States & Skeleton Loaders
-- [x] Module 6: Secure Next.js Backend API Routes & Gemini AI Integration
-  - [x] `/api/ai/intent` (analyzes DOM metadata for LinkedIn/YouTube intent)
-  - [x] `/api/ai/action` (executes specific action and streams/returns markdown content)
-  - [x] Promptless AI prompt engineering templates (Zero-Chat, high signal)
-- [x] Module 7: Chrome Extension Manifest V3 Side Panel
-  - [x] Vite build configuration (`chrome-extension/vite.config.ts`)
-  - [x] Manifest V3 JSON with Side Panel and content scripts
-  - [x] LinkedIn content script (`content/linkedin.ts`: Job Title, Company, Description, Location)
-  - [x] YouTube content script (`content/youtube.ts`: Title, Description, Transcript, Channel)
-  - [x] 420px Dark Glassmorphic Side Panel UI (`Analyzing Page...` step progress -> Action Cards -> Markdown Output Screen)
-- [x] Module 8: End-to-End Quality, Security & Performance Audit
-  - [x] Verify keyboard accessibility, contrast, focus states, and 60 FPS Framer Motion animations
-  - [x] Verified zero ESLint warnings and clean production bundles across Next.js and Chrome Extension workspaces.
+> **Current Sprint**: Phase 3 (Production Hardening & Final Release) — `ALL TASKS COMPLETED (100%)`  
+> **Status**: Ready for Production Deployment (`v1.0.0`)
 
-## 2. In Progress
-- None.
+---
 
-## 3. Pending
-- None.
+## 1. Phase 3: Final Production Release (`v1.0.0`) — [ALL COMPLETED]
 
-## 4. Bugs
-- None currently reported.
+- [x] **[CRITICAL] Chrome Extension SPA Navigation Support**
+  - [x] Integrate `MutationObserver` into `chrome-extension/src/content.ts` for LinkedIn job selection changes.
+  - [x] Bind native `yt-navigate-finish` event listener for YouTube in-page video navigations.
+- [x] **[HIGH] Distributed Serverless Rate Limiting**
+  - [x] Implement `@upstash/ratelimit` and `@upstash/redis` in `lib/security/rate-limiter.ts`.
+  - [x] Add fallback in-memory token bucket for local development when Upstash credentials are unset.
+- [x] **[HIGH] Runtime Request Schema Validation**
+  - [x] Define Zod schemas (`IntentRequestSchema`, `ActionRequestSchema`) in `lib/security/schemas.ts`.
+  - [x] Enforce Zod validation in `app/api/ai/intent/route.ts` and `app/api/ai/action/route.ts`.
+- [x] **[MEDIUM] AI Reliability & DOM Strictness**
+  - [x] Remove static title fallbacks from `content.ts`; display diagnostic `"CANNOT_DETECT_DOM"` badge when selectors break.
+  - [x] Add exponential backoff retry with jitter (`withExponentialBackoff`) in `lib/gemini/client.ts`.
+- [x] **[LOW] Accessibility & Developer Handoff Suite**
+  - [x] Add WAI-ARIA button semantics (`role="button"`, `tabIndex={0}`, keyboard handlers) to all clickable UI cards.
+  - [x] Create 6 developer handoff guides (`COMPLETE_SETUP_GUIDE.md`, `MANUAL_INPUTS.md`, `CHROME_EXTENSION_GUIDE.md`, `PROJECT_VERIFICATION.md`, `FINAL_DEPLOYMENT_GUIDE.md`, `RELEASE_NOTES.md`).
+  - [x] Create automated CLI diagnostic check (`health-check.js`) and verify 7/7 checks pass.
 
-## 5. Improvements
-- [ ] Future Expansion: Modularize content script adapter interface so adding new platforms (e.g. Twitter, Gmail) requires only implementing an `IntentProvider` interface.
+---
+
+## 2. Future Sprint: Phase 4 (v1.1.0 – v1.2.0 Roadmap)
+
+- [ ] **[v1.1.0] Real-Time Markdown Token Streaming**
+  - [ ] Implement Server-Sent Events (SSE) `/api/ai/stream` endpoint for live character-by-character Markdown rendering.
+- [ ] **[v1.2.0] Multi-Platform Extension Adapters**
+  - [ ] Add `TwitterParser` for X/Twitter thread summarization and smart reply generation.
+  - [ ] Add `GitHubParser` for Pull Request diff analysis and automated review notes.
+- [ ] **[v2.0.0] Enterprise Teams & Shared Workspaces**
+  - [ ] Create Supabase organization tables (`organizations`, `org_members`) with team-shared Action Cards.

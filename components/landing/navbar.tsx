@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Sparkles, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChromeIcon } from "@/components/ui/chrome-icon";

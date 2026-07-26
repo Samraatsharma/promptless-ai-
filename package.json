@@ -9,16 +9,19 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google/genai": "^0.1.2",
+    "@google/genai": "^2.13.0",
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.49.1",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.4.7",
     "lucide-react": "^1.16.0",
     "next": "16.2.12",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.0.1"
+    "tailwind-merge": "^3.0.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

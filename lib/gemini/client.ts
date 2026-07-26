@@ -19,6 +19,37 @@ const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 const MODEL_NAME = "gemini-2.5-flash";
 
 /**
+ * Helper utility to execute an async operation with exponential backoff and jitter.
+ * Handles HTTP 429 (Resource Exhausted) and transient 5xx errors from Google AI endpoints.
+ */
+async function withExponentialBackoff<T>(
+  fn: () => Promise<T>,
+  retries: number = 2,
+  delayMs: number = 500
+): Promise<T> {
+  try {
+    return await fn();
+  } catch (err: unknown) {
+    if (retries <= 0) {
+      throw err;
+    }
+    const isRateLimitOr5xx =
+      err instanceof Error &&
+      (err.message.includes("429") ||
+        err.message.includes("503") ||
+        err.message.includes("ResourceExhausted") ||
+        err.message.includes("Overloaded"));
+
+    if (isRateLimitOr5xx) {
+      const jitter = Math.random() * 200;
+      await new Promise((res) => setTimeout(res, delayMs + jitter));
+      return withExponentialBackoff(fn, retries - 1, delayMs * 2);
+    }
+    throw err;
+  }
+}
+
+/**
  * Classifies DOM context from LinkedIn or YouTube into an intent label,
  * confidence score, and 3-4 high-signal Action Cards.
  */
@@ -32,14 +63,16 @@ export async function analyzePageIntent(
 
   try {
     const prompt = buildIntentDetectionPrompt(context);
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        temperature: 0.2,
-      },
-    });
+    const response = await withExponentialBackoff(() =>
+      ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.2,
+        },
+      })
+    );
 
     const text = response.text || "";
     const parsed = JSON.parse(text) as IntentDetectionResult;
@@ -73,13 +106,15 @@ export async function executeAIAction(
       tone
     );
 
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt,
-      config: {
-        temperature: 0.4,
-      },
-    });
+    const response = await withExponentialBackoff(() =>
+      ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: prompt,
+        config: {
+          temperature: 0.4,
+        },
+      })
+    );
 
     const markdownContent = response.text || "";
     const title =

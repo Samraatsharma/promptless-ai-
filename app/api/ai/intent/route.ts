@@ -1,33 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzePageIntent } from "@/lib/gemini/client";
-import { ExtractedPageContext } from "@/types";
 import { createClient } from "@/lib/supabase/server";
+import {
+  checkRateLimit,
+  buildRateLimitResponse,
+  attachRateLimitHeaders,
+} from "@/lib/security/rate-limiter";
+import { sanitizePageContext } from "@/lib/security/sanitize";
+import { IntentRequestSchema } from "@/lib/security/schemas";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const context: ExtractedPageContext = body.context;
+    // 0. Enforce token-bucket rate limiting (30 intent checks/min per IP or User)
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "anonymous-ip";
+    const rateLimit = await checkRateLimit(`intent-${clientIp}`, 30);
+    if (!rateLimit.success) {
+      return buildRateLimitResponse(rateLimit);
+    }
 
-    if (!context || !context.platform || !context.data) {
+    const body = await req.json();
+
+    // 1. Validate payload structure using Zod schema
+    const parsedPayload = IntentRequestSchema.safeParse(body);
+    if (!parsedPayload.success) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            problem: "Invalid ExtractedPageContext payload.",
-            reason:
-              "Request body must contain 'context' with a valid platform ('linkedin' | 'youtube') and data object.",
-            fix: "Verify Chrome Extension Content Script is transmitting the correct DOM structure.",
-            verification: "Inspect network tab in Chrome DevTools for POST payload.",
+            problem: "Invalid ExtractedPageContext payload schema.",
+            reason: parsedPayload.error.issues
+              .map((i) => `${i.path.join(".")}: ${i.message}`)
+              .join("; "),
+            fix: "Verify Chrome Extension Content Script is transmitting the correct DOM structure conforming to Zod schema.",
+            verification:
+              "Inspect network tab in Chrome DevTools for POST payload.",
           },
         },
         { status: 400 }
       );
     }
 
-    // 1. Analyze page intent using Google Gemini 2.5 Flash (or high-fidelity mock)
+    const rawContext = parsedPayload.data.context;
+
+    // 2. Sanitize input against prompt injection and control Unicode attacks
+    const context = sanitizePageContext(rawContext);
+
+    // 3. Analyze page intent using Google Gemini 2.5 Flash (or high-fidelity mock)
     const result = await analyzePageIntent(context);
 
-    // 2. Optionally log to activity_history if user session is active
+    // 4. Optionally log to activity_history if user session is active
     try {
       const supabase = await createClient();
       const {
@@ -51,21 +74,30 @@ export async function POST(req: NextRequest) {
       console.warn("Activity history logging skipped:", dbErr);
     }
 
-    return NextResponse.json({
-      success: true,
-      result,
-    });
-  } catch (err: unknown) {
-    console.error("API /api/ai/intent Error:", err);
+    const response = NextResponse.json(
+      {
+        success: true,
+        result,
+        metadata: {
+          processedAt: new Date().toISOString(),
+          rateLimitSource: rateLimit.source,
+        },
+      },
+      { status: 200 }
+    );
+
+    return attachRateLimitHeaders(response, rateLimit);
+  } catch (error: unknown) {
+    const errMessage =
+      error instanceof Error ? error.message : "Unknown backend error";
     return NextResponse.json(
       {
         success: false,
         error: {
-          problem: "Intent classification request failed.",
-          reason:
-            err instanceof Error ? err.message : "Unexpected server exception.",
-          fix: "Check server logs and verify Google Gemini API key configuration in .env.local.",
-          verification: "Retry sending POST request to /api/ai/intent.",
+          problem: "Internal Server Error in /api/ai/intent",
+          reason: errMessage,
+          fix: "Check backend server logs and verify Google Gemini API key status.",
+          verification: "Verify via 'npm run dev' console output.",
         },
       },
       { status: 500 }

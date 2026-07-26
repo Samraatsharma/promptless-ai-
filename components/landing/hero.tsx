@@ -66,7 +66,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
           >
-            <a href="#demo" className="w-full sm:w-auto">
+            <Link href="#demo" className="w-full sm:w-auto">
               <Button
                 variant="primary"
                 size="lg"
@@ -75,7 +75,7 @@ export function Hero() {
               >
                 Install Extension — Zero Config
               </Button>
-            </a>
+            </Link>
             <Link href="/login" className="w-full sm:w-auto">
               <Button
                 variant="glass"
@@ -102,6 +102,12 @@ export function Hero() {
             <span className="flex items-center gap-1.5">
               <Zap className="w-4 h-4 text-[#4F8DFF]" />
               98% Faster than chatbot copying & pasting
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="px-1.5 py-0.5 rounded bg-white/10 border border-white/15 font-mono text-[10px] text-white">
+                ⌘K
+              </span>
+              Instant Command Palette inside Extension
             </span>
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[#8B5CF6]" />

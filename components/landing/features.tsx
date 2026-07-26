@@ -112,22 +112,27 @@ export function Features() {
             </div>
 
             <div className="space-y-3">
-              {linkedinFeatures.map((feat) => (
+              {linkedinFeatures.map((feat, idx) => (
                 <div
                   key={feat.title}
-                  className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/15 transition-all flex items-start gap-4"
+                  className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-[#4F8DFF]/40 hover:bg-white/[0.06] transition-all flex items-start justify-between gap-4 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
-                    {feat.icon}
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 group-hover:bg-[#4F8DFF]/15 flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                      {feat.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white text-base group-hover:text-[#4F8DFF] transition-colors">
+                        {feat.title}
+                      </h4>
+                      <p className="text-sm text-[#71717a] leading-relaxed">
+                        {feat.desc}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-white text-base">
-                      {feat.title}
-                    </h4>
-                    <p className="text-sm text-[#71717a] leading-relaxed">
-                      {feat.desc}
-                    </p>
-                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#71717a] group-hover:text-white group-hover:border-[#4F8DFF]/50 transition-all shrink-0">
+                    ⌘{idx + 1}
+                  </span>
                 </div>
               ))}
             </div>
@@ -153,22 +158,27 @@ export function Features() {
             </div>
 
             <div className="space-y-3">
-              {youtubeFeatures.map((feat) => (
+              {youtubeFeatures.map((feat, idx) => (
                 <div
                   key={feat.title}
-                  className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-white/15 transition-all flex items-start gap-4"
+                  className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-[#8B5CF6]/40 hover:bg-white/[0.06] transition-all flex items-start justify-between gap-4 group"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 mt-0.5">
-                    {feat.icon}
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-white/5 group-hover:bg-[#8B5CF6]/15 flex items-center justify-center shrink-0 mt-0.5 transition-colors">
+                      {feat.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white text-base group-hover:text-[#8B5CF6] transition-colors">
+                        {feat.title}
+                      </h4>
+                      <p className="text-sm text-[#71717a] leading-relaxed">
+                        {feat.desc}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-white text-base">
-                      {feat.title}
-                    </h4>
-                    <p className="text-sm text-[#71717a] leading-relaxed">
-                      {feat.desc}
-                    </p>
-                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#71717a] group-hover:text-white group-hover:border-[#8B5CF6]/50 transition-all shrink-0">
+                    ⌘{idx + 6}
+                  </span>
                 </div>
               ))}
             </div>

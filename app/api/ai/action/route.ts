@@ -1,25 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { executeAIAction } from "@/lib/gemini/client";
-import { ExtractedPageContext, AIActionType } from "@/types";
+import { AIActionType } from "@/types";
 import { createClient } from "@/lib/supabase/server";
+import {
+  checkRateLimit,
+  buildRateLimitResponse,
+  attachRateLimitHeaders,
+} from "@/lib/security/rate-limiter";
+import { sanitizePageContext, sanitizeDOMText } from "@/lib/security/sanitize";
+import { ActionRequestSchema } from "@/lib/security/schemas";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
-    const actionType: AIActionType = body.actionType;
-    const context: ExtractedPageContext = body.context;
-    const customInstructions: string | undefined = body.customInstructions;
-    const tone: string = body.tone || "professional";
+    // 0. Enforce token-bucket rate limiting (20 action executions/min per IP or User)
+    const clientIp =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      "anonymous-ip";
+    const rateLimit = await checkRateLimit(`action-${clientIp}`, 20);
+    if (!rateLimit.success) {
+      return buildRateLimitResponse(rateLimit);
+    }
 
-    if (!actionType || !context || !context.platform || !context.data) {
+    const body = await req.json();
+
+    // 1. Validate payload structure using Zod schema
+    const parsedPayload = ActionRequestSchema.safeParse(body);
+    if (!parsedPayload.success) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            problem: "Invalid Action Execution payload.",
-            reason:
-              "Request body must include 'actionType' and a valid 'context' object.",
-            fix: "Ensure Chrome Extension Side Panel sends the selected card ID and page context.",
+            problem: "Invalid Action Execution payload schema.",
+            reason: parsedPayload.error.issues
+              .map((i) => `${i.path.join(".")}: ${i.message}`)
+              .join("; "),
+            fix: "Ensure Chrome Extension Side Panel sends the selected card ID and page context conforming to Zod schema.",
             verification: "Inspect payload in Network panel.",
           },
         },
@@ -27,7 +42,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Generate structured executive Markdown via Google Gemini 2.5 Flash
+    const actionType: AIActionType =
+      (body.actionType as AIActionType) ||
+      (parsedPayload.data.actionId as AIActionType) ||
+      "cover_letter";
+    const rawContext = parsedPayload.data.context;
+    const rawCustomInstructions: string | undefined = body.customInstructions;
+    const tone: string = body.tone || "professional";
+
+    // 2. Sanitize input against prompt injection and control Unicode attacks
+    const context = sanitizePageContext(rawContext);
+    const customInstructions = rawCustomInstructions
+      ? sanitizeDOMText(rawCustomInstructions, 1000)
+      : undefined;
+
+    // 3. Generate structured executive Markdown via Google Gemini 2.5 Flash
     const result = await executeAIAction(
       actionType,
       context,
@@ -35,7 +64,7 @@ export async function POST(req: NextRequest) {
       tone
     );
 
-    // 2. Persist to generated_content and activity_history if user is authenticated
+    // 4. Persist to generated_content and activity_history if user is authenticated
     try {
       const supabase = await createClient();
       const {
@@ -71,10 +100,19 @@ export async function POST(req: NextRequest) {
       console.warn("Database persistence skipped:", dbErr);
     }
 
-    return NextResponse.json({
-      success: true,
-      result,
-    });
+    const response = NextResponse.json(
+      {
+        success: true,
+        result,
+        metadata: {
+          processedAt: new Date().toISOString(),
+          rateLimitSource: rateLimit.source,
+        },
+      },
+      { status: 200 }
+    );
+
+    return attachRateLimitHeaders(response, rateLimit);
   } catch (err: unknown) {
     console.error("API /api/ai/action Error:", err);
     return NextResponse.json(
@@ -83,7 +121,9 @@ export async function POST(req: NextRequest) {
         error: {
           problem: "Action execution request failed.",
           reason:
-            err instanceof Error ? err.message : "Server error executing action.",
+            err instanceof Error
+              ? err.message
+              : "Server error executing action.",
           fix: "Verify Google Gemini API connection and model availability.",
           verification: "Retry clicking action card in Chrome Extension.",
         },

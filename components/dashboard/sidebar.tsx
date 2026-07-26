@@ -116,13 +116,13 @@ export function DashboardSidebar({
           <p className="text-[11px] text-[#71717a] leading-relaxed">
             Manifest V3 Side Panel active on LinkedIn Jobs & YouTube videos.
           </p>
-          <a
+          <Link
             href="/#demo"
             className="text-xs text-[#4F8DFF] font-semibold hover:underline flex items-center gap-1"
           >
             <span>Test Browser Simulation</span>
             <ExternalLink className="w-3 h-3" />
-          </a>
+          </Link>
         </div>
 
         <button
