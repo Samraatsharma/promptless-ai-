@@ -79,14 +79,15 @@ Promptless AI utilizes a decoupled hybrid architecture connecting a Manifest V3 
 
 ## 📚 Complete Developer Handoff Documentation Suite
 
-Promptless AI includes **6 comprehensive developer handoff guides** in the root directory:
+Promptless AI includes **7 comprehensive developer handoff guides** in the root directory:
 
-1. **[COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)**: Beginner-friendly 10-minute onboarding guide with commands and step-by-step verification.
-2. **[MANUAL_INPUTS.md](MANUAL_INPUTS.md)**: Exhaustive checklist of **ONLY** the required manual user actions (Gemini key, Supabase URL/keys, Google OAuth, Upstash Redis).
-3. **[CHROME_EXTENSION_GUIDE.md](CHROME_EXTENSION_GUIDE.md)**: Manifest V3 architecture reference, `sidePanel` API usage, SPA testing on LinkedIn/YouTube, and debugging.
-4. **[PROJECT_VERIFICATION.md](PROJECT_VERIFICATION.md)**: Complete quality verification matrix across all **21 production test gates**.
-5. **[FINAL_DEPLOYMENT_GUIDE.md](FINAL_DEPLOYMENT_GUIDE.md)**: Vercel serverless deployment, Supabase production SQL migrations, and Chrome Web Store packaging instructions.
-6. **[RELEASE_NOTES.md](RELEASE_NOTES.md)**: Venture-backed v1.0.0 release notes with executive summary, features, and roadmap.
+1. **[USER_MANUAL_FROM_ZERO.md](USER_MANUAL_FROM_ZERO.md)**: Master 0-to-100 guide explaining how a developer runs the project from Level 0, how an end user uses it, and the complete testing/verification audit matrix.
+2. **[COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)**: Beginner-friendly 10-minute onboarding guide with commands and step-by-step verification.
+3. **[MANUAL_INPUTS.md](MANUAL_INPUTS.md)**: Exhaustive checklist of **ONLY** the required manual user actions (Gemini key, Supabase URL/keys, Google OAuth, Upstash Redis).
+4. **[CHROME_EXTENSION_GUIDE.md](CHROME_EXTENSION_GUIDE.md)**: Manifest V3 architecture reference, `sidePanel` API usage, SPA testing on LinkedIn/YouTube, and debugging.
+5. **[PROJECT_VERIFICATION.md](PROJECT_VERIFICATION.md)**: Complete quality verification matrix across all **21 production test gates**.
+6. **[FINAL_DEPLOYMENT_GUIDE.md](FINAL_DEPLOYMENT_GUIDE.md)**: Vercel serverless deployment, Supabase production SQL migrations, and Chrome Web Store packaging instructions.
+7. **[RELEASE_NOTES.md](RELEASE_NOTES.md)**: Venture-backed v1.0.0 release notes with executive summary, features, and roadmap.
 
 ---
 
