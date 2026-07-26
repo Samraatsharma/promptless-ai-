@@ -13,12 +13,17 @@ import {
   analyzeContextEngine,
   ContextEngineResult,
 } from "./lib/context-engine";
+import {
+  generateConsumerContent,
+  GenerationParams,
+} from "./lib/ai-generator";
 
 export function App() {
   const [platform, setPlatform] = useState<
     "linkedin" | "youtube" | "unsupported"
   >("unsupported");
   const [currentUrl, setCurrentUrl] = useState("");
+  const [pageTitle, setPageTitle] = useState("");
   const [isDemoMode, setIsDemoMode] = useState(false);
 
   const [engineResult, setEngineResult] = useState<ContextEngineResult | null>(
@@ -39,13 +44,15 @@ export function App() {
   const [isExecuting, setIsExecuting] = useState(false);
 
   // Helper to run hierarchical Context Engine & reset state
-  const evaluateUrlContext = (url: string, pageTitle?: string) => {
+  const evaluateUrlContext = (url: string, title?: string) => {
     setCurrentUrl(url);
+    if (title) setPageTitle(title);
+
     // STATE MANAGEMENT: Immediately reset analysis & active modals on URL/SPA navigation
     setIsAnalyzed(false);
     setSelectedAction(null);
 
-    const result = analyzeContextEngine(url, pageTitle);
+    const result = analyzeContextEngine(url, title);
     setEngineResult(result);
     setActions(result.actions);
 
@@ -76,11 +83,11 @@ export function App() {
           message.type === "URL_CHANGED"
         ) {
           if (message.url && message.url !== currentUrl) {
-            evaluateUrlContext(
-              message.url,
+            const title =
               message.context?.data?.jobTitle ||
-                message.context?.data?.videoTitle
-            );
+              message.context?.data?.videoTitle ||
+              pageTitle;
+            evaluateUrlContext(message.url, title);
           }
         }
       };
@@ -101,86 +108,52 @@ export function App() {
     }
   }, [currentUrl]);
 
-  const handleSelectAction = async (actionId: string) => {
+  const generateContentForAction = async (
+    actionId: string,
+    tone: "Professional" | "Casual" | "Executive" | "Direct" = "Professional",
+    length: "Concise" | "Detailed" | "In-Depth" = "Detailed"
+  ) => {
     setIsExecuting(true);
     const chosen = actions.find((a) => a.id === actionId);
 
-    // Simulate short Gemini execution delay
-    await new Promise((res) => setTimeout(res, 850));
+    // Simulate realistic 60 FPS Apple-grade generating steps
+    await new Promise((res) => setTimeout(res, 900));
 
-    let mockMarkdown = "";
-    let title = chosen?.title || "AI Output";
-
-    if (actionId.includes("cover_letter")) {
-      title = `Cover Letter — ${engineResult?.pageType || "Job Application"}`;
-      mockMarkdown = `## Executive Cover Letter — Tailored Application
-
-**To:** Hiring Manager / Talent Team  
-**Role:** ${engineResult?.summaryText || "Target Engineering Position"}
-
-Dear Hiring Team,
-
-I am writing to express my enthusiastic interest in this opportunity. With experience architecting zero-click browser side panels and high-performance serverless AI applications using **React 19**, **Next.js 16**, and **Google Gemini 2.5 Flash**, my background aligns directly with your technical objectives.
-
-### Core Technical Highlights:
-* **Contextual AI Engineering:** Built hierarchical Context Engines that infer intent from live DOM activity with >95% accuracy.
-* **Low-Latency Glassmorphic UI:** Engineered Apple/Arc-inspired 60 FPS interfaces.
-* **Manifest V3 Side Panels:** Experienced building secure browser extensions with SPA MutationObservers.
-
-I look forward to discussing how my skills can contribute immediately.
-
-Warm regards,  
-**Samraat Sharma**`;
-    } else if (actionId.includes("resume_tailoring")) {
-      title = "ATS-Optimized Resume Keywords & Bullets";
-      mockMarkdown = `## ATS-Optimized Resume Alignment
-
-* Engineered a zero-click browser side panel using **Next.js 16 App Router** and **Manifest V3**, reducing developer workflow friction by **98%**.
-* Architected a hierarchical Context Engine with **Google Gemini 2.5 Flash**, achieving **97% intent accuracy** across LinkedIn and YouTube DOMs.
-* Implemented strict Supabase **Row Level Security (RLS)** triggers to ensure zero-log session privacy and multi-tenant isolation.`;
-    } else if (actionId.includes("smart_notes") || actionId.includes("notes")) {
-      title = `Smart Notes — ${engineResult?.activity || "YouTube Video"}`;
-      mockMarkdown = `## Hierarchical Study Notes — ${engineResult?.summaryText || "Technical Lecture"}
-
-**Source:** YouTube Education / Technical Channel  
-**Intent:** ${engineResult?.intent || "Learning"}  
-
----
-
-### 1. Key Concepts Covered
-* **Hierarchical Context Engines:** Why domain-only detection fails and how page-type + activity parsing solves intent accuracy.
-* **SPA Navigation Support:** Using MutationObservers to detect URL changes without full page reloads.
-
-### 2. Implementation Checklist
-* **3-Tier Confidence System:** Separate scores for Website, Page Type, and User Intent.
-* **80% Confidence Guard:** Preventing guessing or hallucinated actions when confidence is below 80%.`;
-    } else {
-      title = `${chosen?.title || "Executive Summary"} — Promptless AI`;
-      mockMarkdown = `## ${chosen?.title || "AI Output Analysis"}
-
-1. **Active Website:** \`${engineResult?.website || "Platform"}\`
-2. **Detected Page Type:** \`${engineResult?.pageType || "Page"}\`
-3. **User Activity:** \`${engineResult?.activity || "Browsing"}\`
-4. **Inferred Intent:** \`${engineResult?.intent || "Content Discovery"}\`
-5. **Confidence Matrix:**
-   - Website: **${engineResult?.confidence.website || 100}%**
-   - Page Type: **${engineResult?.confidence.page || 96}%**
-   - User Intent: **${engineResult?.confidence.intent || 92}%**`;
-    }
+    const content = generateConsumerContent({
+      actionId,
+      actionTitle: chosen?.title || "AI Output",
+      url: currentUrl,
+      pageTitle: pageTitle || engineResult?.summaryText,
+      tone,
+      length,
+    });
 
     setSelectedAction({
       id: actionId,
-      title,
+      title: chosen?.title || "AI Action Result",
       badgeText: chosen?.badgeText || "Instant",
-      markdownContent: mockMarkdown,
+      markdownContent: content,
       sourceUrl: currentUrl || "https://promptless-ai.vercel.app",
     });
 
     setIsExecuting(false);
   };
 
+  const handleSelectAction = (actionId: string) => {
+    generateContentForAction(actionId, "Professional", "Detailed");
+  };
+
+  const handleRegenerate = (
+    tone: "Professional" | "Casual" | "Executive" | "Direct",
+    length: "Concise" | "Detailed" | "In-Depth"
+  ) => {
+    if (selectedAction) {
+      generateContentForAction(selectedAction.id, tone, length);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col relative w-[420px] overflow-x-hidden">
+    <div className="min-h-screen bg-[#09090b] text-[#f4f4f5] flex flex-col relative w-[420px] overflow-x-hidden font-sans select-none">
       <Header
         platform={
           platform === "unsupported" && isDemoMode ? "linkedin" : platform
@@ -205,7 +178,7 @@ Warm regards,
         </div>
       )}
 
-      <main className="flex-1 p-5 space-y-6 overflow-y-auto pb-12">
+      <main className="flex-1 p-5 space-y-5 overflow-y-auto pb-12">
         {platform === "unsupported" && !isDemoMode ? (
           <UnsupportedScreen
             currentUrl={currentUrl}
@@ -213,7 +186,7 @@ Warm regards,
           />
         ) : (
           <>
-            {/* Hierarchical Context Engine Analyzer */}
+            {/* Consumer Hero Banner (Internal AI Reasoning Hidden by Default) */}
             <Analyzer
               platform={
                 platform === "unsupported" && isDemoMode
@@ -228,12 +201,12 @@ Warm regards,
               confidenceScores={engineResult?.confidence}
               summary={
                 engineResult?.summaryText ||
-                "Analyzing active page hierarchy and DOM context..."
+                "Contextual browser intelligence active"
               }
               onAnalysisComplete={() => setIsAnalyzed(true)}
             />
 
-            {/* Action Cards Section */}
+            {/* Linear/Raycast Action Cards */}
             {isAnalyzed && (
               <ActionCards
                 actions={actions}
@@ -245,7 +218,7 @@ Warm regards,
         )}
       </main>
 
-      {/* Slide-over Output Screen */}
+      {/* Premium Apple-Grade Slide-over Output Screen */}
       <AnimatePresence>
         {selectedAction && (
           <OutputScreen
@@ -253,7 +226,9 @@ Warm regards,
             actionBadge={selectedAction.badgeText}
             markdownContent={selectedAction.markdownContent}
             sourceUrl={selectedAction.sourceUrl}
+            isGenerating={isExecuting}
             onBack={() => setSelectedAction(null)}
+            onRegenerate={handleRegenerate}
           />
         )}
       </AnimatePresence>

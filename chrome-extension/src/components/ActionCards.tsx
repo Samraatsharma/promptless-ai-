@@ -8,6 +8,24 @@ import {
   Search,
   Sparkles,
   ArrowRight,
+  Edit3,
+  MessageSquare,
+  Layers,
+  BarChart2,
+  UserPlus,
+  CheckCircle2,
+  HelpCircle,
+  TrendingUp,
+  Building2,
+  CheckSquare,
+  Send,
+  Clock,
+  Heart,
+  Tv,
+  Compass,
+  Star,
+  Users,
+  Share2,
 } from "lucide-react";
 
 export interface ActionCardItem {
@@ -33,82 +51,111 @@ export function ActionCards({
   const getIcon = (iconName: string) => {
     switch (iconName) {
       case "FileText":
-        return <FileText className="w-5 h-5 text-[#4F8DFF]" />;
+        return <FileText className="w-4 h-4 text-blue-400" />;
       case "Briefcase":
-        return <Briefcase className="w-5 h-5 text-[#8B5CF6]" />;
+        return <Briefcase className="w-4 h-4 text-purple-400" />;
       case "BookOpen":
-        return <BookOpen className="w-5 h-5 text-[#10B981]" />;
+        return <BookOpen className="w-4 h-4 text-emerald-400" />;
       case "Award":
-        return <Award className="w-5 h-5 text-[#F59E0B]" />;
+        return <Award className="w-4 h-4 text-amber-400" />;
+      case "Edit3":
+        return <Edit3 className="w-4 h-4 text-pink-400" />;
+      case "Sparkles":
+        return <Sparkles className="w-4 h-4 text-yellow-400" />;
+      case "MessageSquare":
+      case "MessageCircle":
+        return <MessageSquare className="w-4 h-4 text-cyan-400" />;
+      case "Layers":
+        return <Layers className="w-4 h-4 text-indigo-400" />;
+      case "BarChart2":
+        return <BarChart2 className="w-4 h-4 text-emerald-400" />;
+      case "UserPlus":
+      case "Users":
+        return <Users className="w-4 h-4 text-blue-400" />;
+      case "CheckCircle2":
+      case "CheckSquare":
+      case "FileCheck":
+        return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
+      case "HelpCircle":
+        return <HelpCircle className="w-4 h-4 text-amber-400" />;
+      case "TrendingUp":
+        return <TrendingUp className="w-4 h-4 text-green-400" />;
+      case "Building2":
+        return <Building2 className="w-4 h-4 text-purple-400" />;
+      case "Send":
+        return <Send className="w-4 h-4 text-blue-400" />;
+      case "Clock":
+        return <Clock className="w-4 h-4 text-orange-400" />;
+      case "Heart":
+        return <Heart className="w-4 h-4 text-rose-400" />;
+      case "Tv":
+        return <Tv className="w-4 h-4 text-red-400" />;
+      case "Compass":
+        return <Compass className="w-4 h-4 text-teal-400" />;
+      case "Star":
+        return <Star className="w-4 h-4 text-yellow-400" />;
+      case "Share2":
+        return <Share2 className="w-4 h-4 text-indigo-400" />;
+      case "Twitter":
+        return <Share2 className="w-4 h-4 text-sky-400" />;
       default:
-        return <Search className="w-5 h-5 text-[#4F8DFF]" />;
+        return <Search className="w-4 h-4 text-blue-400" />;
     }
   };
 
   return (
     <div className="space-y-3">
-      {/* Label Bar */}
+      {/* Sleek Raycast/Linear Label Bar */}
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-[#4F8DFF]" />
-          Ready Actions (Zero-Click)
+        <span className="text-xs font-bold text-white tracking-wide flex items-center gap-1.5">
+          <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+          Context-Ready Actions
         </span>
-        <span className="text-[11px] text-[#10B981] font-mono">
-          98% Confidence
+        <span className="text-[11px] text-zinc-400 font-medium">
+          Zero-Click AI
         </span>
       </div>
 
       {/* Action Cards Grid */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {actions.map((action, idx) => (
           <motion.div
             key={action.id}
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.1 }}
+            transition={{ delay: idx * 0.04 }}
             onClick={() => !isExecuting && onSelectAction(action.id)}
-            className={`group p-4 rounded-2xl bg-white/[0.04] border border-white/10 hover:border-[#4F8DFF] hover:bg-gradient-to-r hover:from-[#4F8DFF]/10 hover:to-transparent transition-all cursor-pointer shadow-glass relative overflow-hidden ${
+            className={`group p-3.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-blue-500/40 transition-all cursor-pointer shadow-md relative overflow-hidden ${
               isExecuting ? "opacity-50 pointer-events-none" : ""
             }`}
           >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
                   {getIcon(action.iconName)}
                 </div>
-                <div>
-                  <h4 className="font-bold text-white text-sm group-hover:text-[#4F8DFF] transition-colors flex items-center gap-1.5">
-                    {action.title}
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-white font-normal">
-                      {action.badgeText}
-                    </span>
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-white text-xs group-hover:text-blue-400 transition-colors flex items-center gap-1.5 truncate">
+                    <span>{action.title}</span>
                   </h4>
-                  <p className="text-xs text-[#71717a] mt-0.5 leading-relaxed">
+                  <p className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">
                     {action.description}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[#71717a] group-hover:text-white group-hover:border-[#4F8DFF]/50 transition-all">
-                  ⌘{idx + 1}
+              {/* Keyboard Shortcut Pill & Action Arrow */}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-zinc-400 group-hover:text-white group-hover:border-white/20 transition-all">
+                  {action.badgeText}
                 </span>
-                <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-[#71717a] group-hover:text-white group-hover:bg-[#4F8DFF] transition-all">
-                  <ArrowRight className="w-4 h-4" />
-                </div>
+                <span className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-blue-500/20 group-hover:text-blue-400 transition-colors text-zinc-500">
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
               </div>
             </div>
           </motion.div>
         ))}
-      </div>
-
-      {/* Strict zero-input reminder banner */}
-      <div className="p-3 rounded-xl bg-gradient-to-r from-[#4F8DFF]/5 to-[#8B5CF6]/5 border border-white/5 text-center">
-        <p className="text-[11px] text-[#71717a]">
-          <span className="text-[#f4f4f5] font-semibold">Zero-Input Guaranteed:</span>{" "}
-          No chatbot textboxes or typing required. Click any card to handcraft
-          output instantly.
-        </p>
       </div>
     </div>
   );

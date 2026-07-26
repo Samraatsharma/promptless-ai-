@@ -279,11 +279,15 @@ export function generateActions(
     switch (pageType) {
       case "Feed":
         return [
-          { id: "feed_create_post", title: "Create Post", description: "Draft a high-engagement professional LinkedIn post.", iconName: "Edit3", confidence: 94, badgeText: "Viral Hook" },
-          { id: "feed_improve_post", title: "Improve Post", description: "Enhance tone, readability, and formatting of draft.", iconName: "Sparkles", confidence: 92, badgeText: "Polished" },
-          { id: "feed_reply_post", title: "Reply to Post", description: "Generate an insightful, value-add comment reply.", iconName: "MessageSquare", confidence: 91, badgeText: "Engagement" },
-          { id: "feed_rewrite", title: "Professional Rewrite", description: "Transform casual notes into executive communication.", iconName: "FileText", confidence: 89, badgeText: "Executive" },
+          { id: "feed_viral_post", title: "Create Viral Post", description: "Draft a high-engagement professional LinkedIn post with hook.", iconName: "Edit3", confidence: 96, badgeText: "Viral Hook" },
+          { id: "feed_rewrite", title: "Rewrite Post", description: "Transform casual notes into executive communication.", iconName: "FileText", confidence: 94, badgeText: "Executive" },
+          { id: "feed_improve", title: "Improve Writing", description: "Enhance grammar, tone, readability, and scannability.", iconName: "Sparkles", confidence: 93, badgeText: "Polished" },
+          { id: "feed_carousel", title: "Generate Carousel Idea", description: "Create a 6-slide visual carousel concept with slide copy.", iconName: "Layers", confidence: 92, badgeText: "Carousel" },
+          { id: "feed_poll", title: "Create Poll", description: "Generate a high-conversion poll question with 4 options.", iconName: "BarChart2", confidence: 91, badgeText: "Engagement" },
+          { id: "feed_comment", title: "Comment Generator", description: "Craft an insightful, high-signal comment reply ready to paste.", iconName: "MessageSquare", confidence: 90, badgeText: "Value Add" },
+          { id: "feed_reply", title: "Reply Generator", description: "Generate a thoughtful follow-up response.", iconName: "MessageCircle", confidence: 89, badgeText: "Response" },
           { id: "feed_connection", title: "Connection Request", description: "Craft a personalized 300-char connection note.", iconName: "UserPlus", confidence: 88, badgeText: "Networking" },
+          { id: "feed_branding", title: "Personal Branding Ideas", description: "Suggest 3 actionable personal branding content themes.", iconName: "Award", confidence: 87, badgeText: "Strategy" },
         ];
 
       case "Jobs Search":
@@ -295,26 +299,31 @@ export function generateActions(
 
       case "Individual Job":
         return [
-          { id: "resume_tailoring", title: "Tailor Resume", description: "Align skills and ATS keywords with this exact role.", iconName: "Briefcase", confidence: 98, badgeText: "ATS Match" },
-          { id: "cover_letter", title: "Generate Cover Letter", description: "Handcraft executive cover letter tailored to this job.", iconName: "FileText", confidence: 97, badgeText: "High Signal" },
-          { id: "ats_suggestions", title: "ATS Suggestions", description: "Identify missing keywords and qualification gaps.", iconName: "CheckCircle2", confidence: 95, badgeText: "Optimization" },
-          { id: "interview_questions", title: "Interview Questions", description: "Predict top 5 technical and behavioral questions.", iconName: "HelpCircle", confidence: 94, badgeText: "Preparation" },
-          { id: "company_research", title: "Company Research", description: "Summarize company culture, mission, and news.", iconName: "Search", confidence: 92, badgeText: "Executive" },
+          { id: "job_tailor_resume", title: "Tailor Resume", description: "Align skills and ATS keywords with this exact role.", iconName: "Briefcase", confidence: 98, badgeText: "ATS Match" },
+          { id: "job_cover_letter", title: "Cover Letter", description: "Handcraft executive cover letter tailored to this job.", iconName: "FileText", confidence: 97, badgeText: "High Signal" },
+          { id: "job_ats", title: "ATS Optimization", description: "Identify missing keywords and qualification gaps.", iconName: "CheckCircle2", confidence: 96, badgeText: "Optimization" },
+          { id: "job_interview_qs", title: "Interview Questions", description: "Predict top 5 technical and behavioral questions.", iconName: "HelpCircle", confidence: 95, badgeText: "Preparation" },
+          { id: "job_salary", title: "Salary Negotiation Tips", description: "Salary benchmarks and executive negotiation scripts.", iconName: "TrendingUp", confidence: 94, badgeText: "Compensation" },
+          { id: "job_company", title: "Company Research", description: "Summarize company culture, mission, and news.", iconName: "Building2", confidence: 93, badgeText: "Executive" },
+          { id: "job_skills_gap", title: "Skills Gap Analysis", description: "Table comparing your skills vs job requirements.", iconName: "CheckSquare", confidence: 92, badgeText: "Market Fit" },
         ];
 
       case "Profile":
         return [
-          { id: "profile_headline", title: "Improve Headline", description: "Craft a compelling, searchable headline with keywords.", iconName: "Award", confidence: 96, badgeText: "SEO Brand" },
-          { id: "profile_about", title: "Rewrite About", description: "Structure your professional story for high conversion.", iconName: "FileText", confidence: 95, badgeText: "Storytelling" },
-          { id: "profile_experience", title: "Improve Experience", description: "Quantify achievements using STAR methodology.", iconName: "TrendingUp", confidence: 93, badgeText: "Impact" },
-          { id: "profile_skills", title: "Skills Suggestions", description: "Recommend top industry skills to add to your profile.", iconName: "CheckSquare", confidence: 91, badgeText: "Market Fit" },
+          { id: "profile_headline", title: "Rewrite Headline", description: "5 high-converting, searchable headline variations.", iconName: "Award", confidence: 97, badgeText: "SEO Brand" },
+          { id: "profile_about", title: "Improve About Section", description: "Storytelling About section structured for conversion.", iconName: "FileText", confidence: 96, badgeText: "Storytelling" },
+          { id: "profile_experience", title: "Rewrite Experience", description: "Quantify achievements using STAR methodology.", iconName: "TrendingUp", confidence: 94, badgeText: "Impact" },
+          { id: "profile_skills", title: "Skills Suggestions", description: "Recommend top industry skills to add to your profile.", iconName: "CheckSquare", confidence: 93, badgeText: "Market Fit" },
+          { id: "profile_seo", title: "SEO Optimization", description: "SEO keyword audit and profile optimization checklist.", iconName: "Search", confidence: 92, badgeText: "Visibility" },
         ];
 
       case "Messaging":
         return [
-          { id: "msg_reply_draft", title: "Reply Draft", description: "Draft a concise, professional response message.", iconName: "MessageCircle", confidence: 95, badgeText: "Instant" },
-          { id: "msg_rewrite", title: "Professional Rewrite", description: "Refine tone and clarity before sending message.", iconName: "Edit2", confidence: 93, badgeText: "Polished" },
-          { id: "msg_follow_up", title: "Follow Up", description: "Generate a polite follow-up checking in on status.", iconName: "Clock", confidence: 91, badgeText: "Tactful" },
+          { id: "msg_reply", title: "Reply", description: "Draft a concise, professional response message.", iconName: "MessageCircle", confidence: 96, badgeText: "Instant" },
+          { id: "msg_cold", title: "Cold Outreach", description: "High-converting cold outreach template.", iconName: "Send", confidence: 95, badgeText: "Conversion" },
+          { id: "msg_follow", title: "Follow Up", description: "Generate a polite follow-up checking in on status.", iconName: "Clock", confidence: 93, badgeText: "Tactful" },
+          { id: "msg_networking", title: "Networking Message", description: "Personalized coffee-chat networking request.", iconName: "Users", confidence: 92, badgeText: "Networking" },
+          { id: "msg_thanks", title: "Thank You Message", description: "Professional post-meeting thank-you note.", iconName: "Heart", confidence: 91, badgeText: "Polished" },
         ];
 
       case "Company Page":
@@ -335,24 +344,30 @@ export function generateActions(
     switch (pageType) {
       case "Watch Page":
         return [
-          { id: "smart_summary", title: "Summary", description: "2-minute executive distillation of core takeaways.", iconName: "FileText", confidence: 98, badgeText: "Instant" },
-          { id: "smart_notes", title: "Notes", description: "Hierarchical study notes with timestamps and terms.", iconName: "BookOpen", confidence: 97, badgeText: "Structured" },
-          { id: "quiz", title: "Quiz", description: "Test retention with 5 interactive Q&A practice pairs.", iconName: "Award", confidence: 94, badgeText: "Spaced Rep" },
-          { id: "flashcards", title: "Flashcards", description: "Generate study flashcards for terminology and facts.", iconName: "Layers", confidence: 92, badgeText: "Memorize" },
-          { id: "key_takeaways", title: "Key Takeaways", description: "Extract actionable advice and code/formula references.", iconName: "CheckCircle2", confidence: 91, badgeText: "High Signal" },
-        ];
-
-      case "Playlist":
-        return [
-          { id: "playlist_summary", title: "Playlist Summary", description: "Overview of topics covered across all videos in list.", iconName: "List", confidence: 95, badgeText: "Curated" },
-          { id: "learning_roadmap", title: "Learning Roadmap", description: "Step-by-step study plan based on playlist sequence.", iconName: "Compass", confidence: 93, badgeText: "Roadmap" },
+          { id: "yt_summary", title: "Smart Summary", description: "2-minute executive distillation of core takeaways.", iconName: "FileText", confidence: 98, badgeText: "Instant" },
+          { id: "yt_notes", title: "Detailed Notes", description: "Hierarchical study notes with timestamps and terms.", iconName: "BookOpen", confidence: 97, badgeText: "Structured" },
+          { id: "yt_flashcards", title: "Flashcards", description: "5 spaced-repetition study flashcard Q&A pairs.", iconName: "Layers", confidence: 95, badgeText: "Memorize" },
+          { id: "yt_quiz", title: "Quiz", description: "Interactive multiple-choice quiz with answer key.", iconName: "Award", confidence: 94, badgeText: "Spaced Rep" },
+          { id: "yt_takeaways", title: "Key Takeaways", description: "5 high-signal actionable advice takeaways.", iconName: "CheckCircle2", confidence: 93, badgeText: "High Signal" },
+          { id: "yt_action_items", title: "Action Items", description: "Checklist of practical action items from the video.", iconName: "CheckSquare", confidence: 92, badgeText: "Checklist" },
+          { id: "yt_mindmap", title: "Mind Map", description: "Conceptual architecture diagram of core concepts.", iconName: "Share2", confidence: 91, badgeText: "Visual" },
+          { id: "yt_blog", title: "Blog Article", description: "500-word polished blog article adapted from lecture.", iconName: "Edit3", confidence: 90, badgeText: "Article" },
+          { id: "yt_twitter", title: "Twitter Thread", description: "7-tweet viral Twitter/X thread summarizing video.", iconName: "Twitter", confidence: 89, badgeText: "Viral" },
         ];
 
       case "Channel":
         return [
-          { id: "channel_analysis", title: "Channel Analysis", description: "Summarize creator niche, teaching style, and focus.", iconName: "Tv", confidence: 95, badgeText: "Creator" },
-          { id: "best_videos", title: "Best Videos", description: "Highlight top-recommended tutorials on this channel.", iconName: "Star", confidence: 93, badgeText: "Top Rated" },
-          { id: "learning_path", title: "Learning Path", description: "Recommend beginner-to-pro viewing sequence.", iconName: "TrendingUp", confidence: 91, badgeText: "Guided" },
+          { id: "channel_analysis", title: "Channel Analysis", description: "Creator niche, audience demographic, and content style.", iconName: "Tv", confidence: 96, badgeText: "Creator" },
+          { id: "channel_path", title: "Learning Path", description: "Guided beginner-to-pro viewing sequence.", iconName: "Compass", confidence: 94, badgeText: "Guided" },
+          { id: "channel_best", title: "Best Videos", description: "Top recommended foundational videos on this channel.", iconName: "Star", confidence: 93, badgeText: "Top Rated" },
+          { id: "channel_similar", title: "Similar Channels", description: "3 similar high-signal technical channels to follow.", iconName: "Users", confidence: 91, badgeText: "Discovery" },
+        ];
+
+      case "Playlist":
+        return [
+          { id: "playlist_summary", title: "Playlist Summary", description: "Comprehensive summary of topics across playlist.", iconName: "List", confidence: 96, badgeText: "Curated" },
+          { id: "playlist_notes", title: "Course Notes", description: "Course study guide and module breakdown.", iconName: "BookOpen", confidence: 94, badgeText: "Study Guide" },
+          { id: "playlist_roadmap", title: "Learning Roadmap", description: "Step-by-step learning roadmap and timeline.", iconName: "TrendingUp", confidence: 92, badgeText: "Roadmap" },
         ];
 
       case "Home Feed":
