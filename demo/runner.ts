@@ -22,6 +22,7 @@ import { DEMO_CONFIG } from './config';
 import { runLinkedInDemo } from './scenarios/linkedin';
 import { runYouTubeDemo } from './scenarios/youtube';
 import { runGitHubDemo } from './scenarios/github';
+import { runGmailDemo } from './scenarios/gmail';
 import { runFullDemo } from './scenarios/full-demo';
 import { sleep } from './utils/mouse';
 
@@ -56,6 +57,10 @@ async function runScenario(page: Page, context: BrowserContext): Promise<void> {
 
     case 'github-demo':
       await runGitHubDemo(page);
+      break;
+
+    case 'gmail-demo':
+      await runGmailDemo(page);
       break;
 
     case 'full-demo':
