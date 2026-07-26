@@ -1,5 +1,6 @@
 import React from "react";
 import { Sparkles } from "lucide-react";
+import { PromptlessLogo } from "./PromptlessLogo";
 
 interface HeaderProps {
   platform: "linkedin" | "youtube" | "unsupported" | "unknown";
@@ -35,11 +36,7 @@ export function Header({ platform, isConnected }: HeaderProps) {
     <header className="h-16 border-b border-white/10 bg-[#09090b]/90 backdrop-blur-xl px-5 flex items-center justify-between sticky top-0 z-30 select-none">
       {/* Logo & Title */}
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#4F8DFF] to-[#8B5CF6] p-0.5 shadow-[0_0_15px_rgba(79,141,255,0.3)]">
-          <div className="w-full h-full bg-[#09090b] rounded-[10px] flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-[#4F8DFF]" />
-          </div>
-        </div>
+        <PromptlessLogo size={32} variant="gradient" />
         <div>
           <span className="font-bold text-sm tracking-tight text-white block">
             Promptless<span className="text-[#4F8DFF]">AI</span>

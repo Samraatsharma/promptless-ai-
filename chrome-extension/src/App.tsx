@@ -16,6 +16,7 @@ import {
   OutputScreen,
   UnsupportedScreen,
   AskPromptless,
+  PromptlessLogo,
   ActionCardItem,
 } from "./components";
 import {
@@ -254,10 +255,7 @@ export function App() {
             animate={{ opacity: 1 }}
             className="py-14 flex flex-col items-center justify-center text-center space-y-3"
           >
-            <div className="relative w-11 h-11 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
-              <Sparkles className="w-4 h-4 text-blue-400 animate-pulse" />
-            </div>
+            <PromptlessLogo size={56} variant="gradient" animated={true} />
             <div>
               <h3 className="text-sm font-bold text-white tracking-wide">
                 Analyzing current page...
