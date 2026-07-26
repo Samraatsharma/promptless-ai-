@@ -124,36 +124,65 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
-// Single-Page Application (SPA) Navigation Observer
-// Monitors YouTube and LinkedIn URL/DOM changes to notify side panel automatically
+// Comprehensive Single-Page Application (SPA) & Browser Lifecycle Observer
 let lastReportedUrl = window.location.href;
 
-function notifySidePanelOfNavigation() {
+function notifySidePanelOfNavigation(forceReset = false) {
   const currentUrl = window.location.href;
-  if (currentUrl !== lastReportedUrl) {
+  if (currentUrl !== lastReportedUrl || forceReset) {
     lastReportedUrl = currentUrl;
     const context = getPageContext();
-    chrome.runtime.sendMessage({
-      type: "PAGE_CONTEXT_UPDATED",
-      url: currentUrl,
-      context,
-    }).catch(() => {
-      // Side panel may be closed, ignore messaging error
-    });
+    chrome.runtime
+      .sendMessage({
+        type: "PAGE_CONTEXT_UPDATED",
+        url: currentUrl,
+        context,
+        reset: true,
+        timestamp: Date.now(),
+      })
+      .catch(() => {
+        // Side panel may be closed, ignore messaging error
+      });
   }
 }
 
-// YouTube SPA event listener
+// 1. Monkey-patch History API (pushState & replaceState) for SPA client-side routing
+const originalPushState = history.pushState;
+const originalReplaceState = history.replaceState;
+
+history.pushState = function (...args) {
+  originalPushState.apply(this, args);
+  notifySidePanelOfNavigation(true);
+};
+
+history.replaceState = function (...args) {
+  originalReplaceState.apply(this, args);
+  notifySidePanelOfNavigation(true);
+};
+
+// 2. Listen for browser Back, Forward, and Hash Navigation
+window.addEventListener("popstate", () => notifySidePanelOfNavigation(true));
+window.addEventListener("hashchange", () => notifySidePanelOfNavigation(true));
+
+// 3. YouTube specific navigation event
 window.addEventListener("yt-navigate-finish", () => {
-  setTimeout(notifySidePanelOfNavigation, 1000);
+  setTimeout(() => notifySidePanelOfNavigation(true), 300);
 });
 
-// DOM MutationObserver for LinkedIn client-side route transitions
+// 4. Page Visibility & Focus Changes
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    notifySidePanelOfNavigation(false);
+  }
+});
+
+// 5. DOM MutationObserver fallback for dynamic frameworks
 const observer = new MutationObserver(() => {
-  notifySidePanelOfNavigation();
+  notifySidePanelOfNavigation(false);
 });
 if (document.body) {
   observer.observe(document.body, { childList: true, subtree: true });
 }
 
-console.log("Promptless AI Content Script with SPA Observers Loaded.");
+console.log("Promptless AI 2.0 Content Script with Live Context Synchronization Loaded.");
+
